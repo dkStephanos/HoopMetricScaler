@@ -1,3 +1,4 @@
+// src/App.js
 import React, { useEffect, useState } from 'react';
 import { TextField, Button, Container, Typography, Box, CircularProgress } from '@mui/material';
 
@@ -10,7 +11,7 @@ function App() {
     const fetchPlayer = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`/player/${name}`);
+        const response = await fetch(`http://localhost:3001/player/${name}`);
         if (!response.ok) {
           throw new Error('Player not found');
         }
@@ -30,7 +31,7 @@ function App() {
     <Container>
       <Box sx={{ my: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom>
-          NBA Player Stats!
+          NBA Player Stats
         </Typography>
         <TextField
           label="Player Name"

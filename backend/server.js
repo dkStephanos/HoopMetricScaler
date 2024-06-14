@@ -1,7 +1,10 @@
 const express = require('express');
+const cors = require('cors');
 const nba = require('nba');
 const app = express();
 const port = 3001;
+
+app.use(cors());
 
 app.get('/player/:name', async (req, res) => {
     const player = nba.findPlayer(req.params.name);

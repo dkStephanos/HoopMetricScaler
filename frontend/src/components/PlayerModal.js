@@ -2,8 +2,6 @@ import React from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 
 function PlayerModal({ player, playerStats, onClose }) {
-  const { seasonTotalsRegularSeason, seasonTotalsPostSeason, careerHighs } = playerStats;
-
   const renderTable = (stats) => (
     <Table>
       <TableHead>
@@ -65,7 +63,7 @@ function PlayerModal({ player, playerStats, onClose }) {
     </Table>
   );
 
-  return (
+  return playerStats && (
     <Dialog open={Boolean(player)} onClose={onClose}>
       <DialogTitle>{player.name}</DialogTitle>
       <DialogContent>
@@ -73,36 +71,15 @@ function PlayerModal({ player, playerStats, onClose }) {
         <Typography>Position: {player.position}</Typography>
 
         <Typography variant="h6">Regular Season Stats</Typography>
-        {renderTable(seasonTotalsRegularSeason)}
+        {renderTable(playerStats.seasonTotalsRegularSeason)}
 
-        {seasonTotalsPostSeason.length > 0 && (
+        {playerStats.seasonTotalsPostSeason.length > 0 && (
           <>
             <Typography variant="h6">Post Season Stats</Typography>
-            {renderTable(seasonTotalsPostSeason)}
+            {renderTable(playerStats.seasonTotalsPostSeason)}
           </>
         )}
 
-        <Typography variant="h6">Career Highs</Typography>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Stat</TableCell>
-              <TableCell>Value</TableCell>
-              <TableCell>Game Date</TableCell>
-              <TableCell>Opponent</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {careerHighs.map((high) => (
-              <TableRow key={high.stat}>
-                <TableCell>{high.stat}</TableCell>
-                <TableCell>{high.statValue}</TableCell>
-                <TableCell>{high.gameDate}</TableCell>
-                <TableCell>{high.vsTeamName}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Close</Button>

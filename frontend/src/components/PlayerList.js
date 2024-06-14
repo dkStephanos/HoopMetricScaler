@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Container, Box, Typography, Select, MenuItem } from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
+import { Container, Box, Typography, Select, MenuItem, Card, CardContent, CardMedia, Grid } from "@mui/material";
 import PlayerModal from "./PlayerModal";
 import { TEAMS, SEASONS } from "../constants";
 
@@ -29,8 +28,7 @@ function PlayerList() {
     fetchPlayers();
   }, [season, teamID]);
 
-  const handleRowClick = async (params) => {
-    const player = params.row;
+  const handleCardClick = async (player) => {
     setSelectedPlayer(player);
     try {
       const response = await fetch(
@@ -45,14 +43,6 @@ function PlayerList() {
       console.error("Error fetching player stats:", error);
     }
   };
-
-  const columns = [
-    { field: "name", headerName: "Name", width: 150 },
-    { field: "position", headerName: "Position", width: 150 },
-    { field: "height", headerName: "Height", width: 100 },
-    { field: "weight", headerName: "Weight", width: 100 },
-    { field: "teamAbbreviation", headerName: "Team", width: 100 },
-  ];
 
   return (
     <Container>
@@ -86,17 +76,28 @@ function PlayerList() {
             </MenuItem>
           ))}
         </Select>
-        <div style={{ height: 600, width: "100%" }}>
-          <DataGrid
-            rows={players}
-            columns={columns}
-            onRowClick={handleRowClick}
-            hideFooterPagination
-            hideFooterSelectedRowCount
-          />
-        </div>
+        <Grid container spacing={2}>
+          {players.map((player) => (
+            <Grid item xs={12} sm={6} md={4} key={player.id}>
+              <Card onClick={() => handleCardClick(player)}>
+                <CardMedia
+                  component="img"
+                  height="140"
+                  image={`https://cdn.nba.com/headshots/nba/latest/1040x760/${player.id}.png`}
+                  alt={`${player.name}'s headshot`}
+                />
+                <CardContent>
+                  <Typography variant="h6">{player.name}</Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    Position: {player.position}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
       </Box>
-      {selectedPlayer && (
+      {selectedPlayer && playerStats && (
         <PlayerModal
           player={selectedPlayer}
           playerStats={playerStats}

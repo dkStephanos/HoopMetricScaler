@@ -1,23 +1,36 @@
-import React, { useEffect, useState } from 'react';
-import { Container, Box, Typography, Select, MenuItem, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
-import PlayerModal from './PlayerModal';
+import React, { useEffect, useState } from "react";
+import {
+  Container,
+  Box,
+  Typography,
+  Select,
+  MenuItem,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+} from "@mui/material";
+import PlayerModal from "./PlayerModal";
 
 function PlayerList() {
-  const [season, setSeason] = useState('2023-24');
+  const [season, setSeason] = useState("2023-24");
   const [players, setPlayers] = useState([]);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
 
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
-        const response = await fetch(`http://localhost:3001/players?season=${season}`);
+        const response = await fetch(
+          `http://localhost:3001/players?season=${season}`
+        );
         if (!response.ok) {
-          throw new Error('Network response was not ok');
+          throw new Error("Network response was not ok");
         }
         const data = await response.json();
         setPlayers(data);
       } catch (error) {
-        console.error('Error fetching players:', error);
+        console.error("Error fetching players:", error);
       }
     };
     fetchPlayers();
@@ -35,10 +48,17 @@ function PlayerList() {
           displayEmpty
           fullWidth
         >
-          <MenuItem value="2023-24">2023-24</MenuItem>
-          <MenuItem value="2022-23">2022-23</MenuItem>
-          <MenuItem value="2021-22">2021-22</MenuItem>
-          {/* Add more seasons as needed */}
+          {Array.from(
+            { length: new Date().getFullYear() - 1996 + 1 },
+            (_, i) => {
+              const year = 1996 + i;
+              return `${year}-${(year + 1).toString().slice(-2)}`;
+            }
+          ).map((season) => (
+            <MenuItem key={season} value={season}>
+              {season}
+            </MenuItem>
+          ))}
         </Select>
         <Table>
           <TableHead>
@@ -50,7 +70,10 @@ function PlayerList() {
           </TableHead>
           <TableBody>
             {players.map((player) => (
-              <TableRow key={player.id} onClick={() => setSelectedPlayer(player)}>
+              <TableRow
+                key={player.id}
+                onClick={() => setSelectedPlayer(player)}
+              >
                 <TableCell>{player.name}</TableCell>
                 <TableCell>{player.team}</TableCell>
                 <TableCell>{player.position}</TableCell>
@@ -60,7 +83,10 @@ function PlayerList() {
         </Table>
       </Box>
       {selectedPlayer && (
-        <PlayerModal player={selectedPlayer} onClose={() => setSelectedPlayer(null)} />
+        <PlayerModal
+          player={selectedPlayer}
+          onClose={() => setSelectedPlayer(null)}
+        />
       )}
     </Container>
   );

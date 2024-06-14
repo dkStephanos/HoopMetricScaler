@@ -91,6 +91,8 @@ function PlayerList() {
             rows={players}
             columns={columns}
             onRowClick={handleRowClick}
+            hideFooterPagination
+            hideFooterSelectedRowCount
           />
         </div>
       </Box>

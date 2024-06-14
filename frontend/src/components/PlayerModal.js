@@ -62,6 +62,8 @@ function PlayerModal({ player, playerStats, onClose }) {
               <DataGrid
                 rows={addIdToRows(playerStats.seasonTotalsRegularSeason)}
                 columns={columns}
+                hideFooterPagination
+                hideFooterSelectedRowCount
               />
             </div>
 
@@ -74,6 +76,8 @@ function PlayerModal({ player, playerStats, onClose }) {
                   <DataGrid
                     rows={addIdToRows(playerStats.seasonTotalsPostSeason)}
                     columns={columns}
+                    hideFooterPagination
+                    hideFooterSelectedRowCount
                   />
                 </div>
               </>

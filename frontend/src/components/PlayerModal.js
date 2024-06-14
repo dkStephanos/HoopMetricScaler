@@ -42,7 +42,21 @@ function PlayerModal({ player, playerStats, onClose }) {
 
   return (
     <Dialog open={Boolean(player)} onClose={onClose} maxWidth="lg" fullWidth>
-      <DialogTitle>{player.name}</DialogTitle>
+      <DialogTitle
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        {player.name}
+        <img
+          src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${player.id}.png`}
+          alt={`${player.name}'s headshot`}
+          style={{ width: "100px", height: "auto", float: "right" }}
+        />
+      </DialogTitle>
+
       <DialogContent>
         <Typography>Team: {player.team}</Typography>
         <Typography>Position: {player.position}</Typography>

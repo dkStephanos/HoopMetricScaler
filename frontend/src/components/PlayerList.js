@@ -12,9 +12,11 @@ import {
   TableRow,
 } from "@mui/material";
 import PlayerModal from "./PlayerModal";
+import { TEAMS, SEASONS } from "../constants";
 
 function PlayerList() {
-  const [season, setSeason] = useState("2023-24");
+  const [season, setSeason] = useState(SEASONS[0]);
+  const [teamID, setTeamID] = useState(TEAMS[0].id);
   const [players, setPlayers] = useState([]);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
 
@@ -22,7 +24,7 @@ function PlayerList() {
     const fetchPlayers = async () => {
       try {
         const response = await fetch(
-          `http://localhost:3001/players?season=${season}`
+          `http://localhost:3001/players?season=${season}&teamID=${teamID}`
         );
         if (!response.ok) {
           throw new Error("Network response was not ok");
@@ -34,7 +36,7 @@ function PlayerList() {
       }
     };
     fetchPlayers();
-  }, [season]);
+  }, [season, teamID]);
 
   return (
     <Container>
@@ -48,15 +50,21 @@ function PlayerList() {
           displayEmpty
           fullWidth
         >
-          {Array.from(
-            { length: new Date().getFullYear() - 1996 + 1 },
-            (_, i) => {
-              const year = 1996 + i;
-              return `${year}-${(year + 1).toString().slice(-2)}`;
-            }
-          ).map((season) => (
+          {SEASONS.map((season) => (
             <MenuItem key={season} value={season}>
               {season}
+            </MenuItem>
+          ))}
+        </Select>
+        <Select
+          value={teamID}
+          onChange={(e) => setTeamID(e.target.value)}
+          displayEmpty
+          fullWidth
+        >
+          {TEAMS.map((team) => (
+            <MenuItem key={team.id} value={team.id}>
+              {team.name}
             </MenuItem>
           ))}
         </Select>

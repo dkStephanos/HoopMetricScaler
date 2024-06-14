@@ -16,9 +16,10 @@ import { TEAMS, SEASONS } from "../constants";
 
 function PlayerList() {
   const [season, setSeason] = useState(SEASONS[0]);
-  const [teamID, setTeamID] = useState(TEAMS[0].id);
+  const [teamID, setTeamID] = useState(TEAMS[3].id);
   const [players, setPlayers] = useState([]);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
+  const [playerStats, setPlayerStats] = useState(null);
 
   useEffect(() => {
     const fetchPlayers = async () => {
@@ -37,6 +38,26 @@ function PlayerList() {
     };
     fetchPlayers();
   }, [season, teamID]);
+
+  useEffect(() => {
+    const fetchPlayerStats = async () => {
+      if (selectedPlayer) {
+        try {
+          const response = await fetch(
+            `http://localhost:3001/player-stats/${selectedPlayer.id}?season=${season}`
+          );
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          const data = await response.json();
+          setPlayerStats(data);
+        } catch (error) {
+          console.error("Error fetching player stats:", error);
+        }
+      }
+    };
+    fetchPlayerStats();
+  }, [selectedPlayer, season]);
 
   return (
     <Container>
@@ -93,6 +114,7 @@ function PlayerList() {
       {selectedPlayer && (
         <PlayerModal
           player={selectedPlayer}
+          playerStats={playerStats}
           onClose={() => setSelectedPlayer(null)}
         />
       )}

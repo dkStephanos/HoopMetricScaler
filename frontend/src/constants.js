@@ -31,7 +31,7 @@ export const TEAMS = [
     { id: 1610612764, name: 'Washington Wizards' }
   ];
   
-  export const SEASONS = Array.from({ length: new Date().getFullYear() - 1996 + 1 }, (_, i) => {
-    const year = 1996 + i;
+  export const SEASONS = Array.from({ length: new Date().getFullYear() - 1996 }, (_, i) => {
+    const year = 2023 - i;
     return `${year}-${(year + 1).toString().slice(-2)}`;
   });

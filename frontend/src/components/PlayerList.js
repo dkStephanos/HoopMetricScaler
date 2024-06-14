@@ -90,13 +90,11 @@ function PlayerList() {
           <DataGrid
             rows={players}
             columns={columns}
-            pageSize={10}
-            rowsPerPageOptions={[10, 25, 50]}
             onRowClick={handleRowClick}
           />
         </div>
       </Box>
-      {selectedPlayer && playerStats && (
+      {selectedPlayer && (
         <PlayerModal
           player={selectedPlayer}
           playerStats={playerStats}

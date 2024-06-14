@@ -1,13 +1,6 @@
-// src/components/PlayerList.js
 import React, { useEffect, useState } from "react";
-import {
-  Container,
-  Box,
-  Typography,
-  Select,
-  MenuItem,
-} from "@mui/material";
-import { DataGrid } from '@mui/x-data-grid';
+import { Container, Box, Typography, Select, MenuItem } from "@mui/material";
+import { DataGrid } from "@mui/x-data-grid";
 import PlayerModal from "./PlayerModal";
 import { TEAMS, SEASONS } from "../constants";
 
@@ -16,6 +9,7 @@ function PlayerList() {
   const [teamID, setTeamID] = useState(TEAMS[3].id);
   const [players, setPlayers] = useState([]);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
+  const [playerStats, setPlayerStats] = useState(null);
 
   useEffect(() => {
     const fetchPlayers = async () => {
@@ -35,10 +29,29 @@ function PlayerList() {
     fetchPlayers();
   }, [season, teamID]);
 
+  const handleRowClick = async (params) => {
+    const player = params.row;
+    setSelectedPlayer(player);
+    try {
+      const response = await fetch(
+        `http://localhost:3001/player-stats/${player.id}?season=${season}`
+      );
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const data = await response.json();
+      setPlayerStats(data);
+    } catch (error) {
+      console.error("Error fetching player stats:", error);
+    }
+  };
+
   const columns = [
-    { field: 'name', headerName: 'Name', width: 150 },
-    { field: 'team', headerName: 'Team', width: 150 },
-    { field: 'position', headerName: 'Position', width: 150 },
+    { field: "name", headerName: "Name", width: 150 },
+    { field: "position", headerName: "Position", width: 150 },
+    { field: "height", headerName: "Height", width: 100 },
+    { field: "weight", headerName: "Weight", width: 100 },
+    { field: "teamAbbreviation", headerName: "Team", width: 100 },
   ];
 
   return (
@@ -52,6 +65,7 @@ function PlayerList() {
           onChange={(e) => setSeason(e.target.value)}
           displayEmpty
           fullWidth
+          sx={{ mb: 2 }}
         >
           {SEASONS.map((season) => (
             <MenuItem key={season} value={season}>
@@ -64,6 +78,7 @@ function PlayerList() {
           onChange={(e) => setTeamID(e.target.value)}
           displayEmpty
           fullWidth
+          sx={{ mb: 2 }}
         >
           {TEAMS.map((team) => (
             <MenuItem key={team.id} value={team.id}>
@@ -71,21 +86,24 @@ function PlayerList() {
             </MenuItem>
           ))}
         </Select>
-        <div style={{ height: 600, width: '100%' }}>
+        <div style={{ height: 600, width: "100%" }}>
           <DataGrid
             rows={players}
             columns={columns}
             pageSize={10}
             rowsPerPageOptions={[10, 25, 50]}
-            onRowClick={(params) => setSelectedPlayer(params.row)}
+            onRowClick={handleRowClick}
           />
         </div>
       </Box>
-      {selectedPlayer && (
+      {selectedPlayer && playerStats && (
         <PlayerModal
           player={selectedPlayer}
-          playerStats={selectedPlayer.playerStats}
-          onClose={() => setSelectedPlayer(null)}
+          playerStats={playerStats}
+          onClose={() => {
+            setSelectedPlayer(null);
+            setPlayerStats(null);
+          }}
         />
       )}
     </Container>

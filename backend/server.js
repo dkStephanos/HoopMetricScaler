@@ -6,6 +6,25 @@ const port = 3001;
 
 app.use(cors());
 
+// Utils
+
+const getPlayersForSeasonAndTeam = async (season, teamID) => {
+    try {
+        const roster = await nba.stats.commonTeamRoster({ Season: season, TeamID: teamID });
+        return roster.commonTeamRoster.map(player => ({
+            id: player.playerId,
+            name: player.player,
+            team: roster.commonTeamRoster[0].teamName, // Assuming all players in the same team have the same team name
+            position: player.position
+        }));
+    } catch (error) {
+        console.error('Error fetching players:', error);
+        throw new Error('Error fetching players');
+    }
+};
+
+// Endpoints
+
 app.get('/player/:name', async (req, res) => {
     const player = nba.findPlayer(req.params.name);
     if (player) {
@@ -17,29 +36,15 @@ app.get('/player/:name', async (req, res) => {
 });
 
 app.get('/players', async (req, res) => {
-    const { season } = req.query;
+    const { season, teamID } = req.query;
     try {
-        // Get all teams for the season
-        const teams = await nba.stats.teamInfoCommon({ Season: season, TeamID: "1610612737" });
-        let allPlayers = [];
-        console.log(teams)
-        for (const team of teams.teamInfoCommon) {
-            // Get roster for each team
-            const roster = await nba.stats.commonTeamRoster({ Season: season, TeamID: team.teamId });
-            allPlayers = allPlayers.concat(roster.commonTeamRoster.map(player => ({
-                id: player.playerId,
-                name: player.player,
-                team: team.teamName,
-                position: player.position
-            })));
-        }
-        console.log(allPlayers)
-        res.json(allPlayers);
+        const players = await getPlayersForSeasonAndTeam(season, teamID);
+        res.json(players);
     } catch (error) {
-        console.error('Error fetching players:', error);
         res.status(500).send('Error fetching players');
     }
 });
+
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);

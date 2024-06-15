@@ -3,7 +3,7 @@ const cors = require('cors');
 const nba = require('nba');
 const bodyParser = require('body-parser');
 const { getExtendedPlayerInfo } = require('./utils');
-const { initializeModel } = require('./ml'); // Adjust the path as needed
+const { initializeModels } = require('./ml'); // Adjust the path as needed
 const logger = require('./logger');
 const fs = require('fs');
 
@@ -60,7 +60,7 @@ app.get('/team-player-dashboard/:teamId', async (req, res) => {
     }
 });
 
-initializeModel().then(() => {
+initializeModels().then(() => {
     app.listen(port, () => {
         logger.info(`Server is running on port ${port}`);
     });

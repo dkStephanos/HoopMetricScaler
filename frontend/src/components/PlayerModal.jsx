@@ -151,7 +151,7 @@ function PlayerModal({ player, playerStats, onClose }) {
           </div>
         )}
         <div style={{ marginTop: 20 }}>
-          <RadarChart />
+          {playerStats && <RadarChart />}
         </div>
       </DialogContent>
       <DialogActions>

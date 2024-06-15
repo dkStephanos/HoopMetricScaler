@@ -25,57 +25,49 @@ function estimateUsageRate(playerStats) {
   return usageRate;
 }
 
-function aggregateData(data) {
-  const aggregatedData = {};
+function aggregateDataByPlayer(data) {
+  const playerData = {};
 
-  data.forEach((row) => {
-    if (!aggregatedData[row.player_name]) {
-      aggregatedData[row.player_name] = {
-        MP: 0,
-        FGA: 0,
-        FTA: 0,
-        TOV: 0,
+  data.forEach(row => {
+    const playerName = row.player_name;
+
+    if (!playerData[playerName]) {
+      playerData[playerName] = {
+        player_name: row.player_name,
         PTS: 0,
-        TRB: 0,
-        AST: 0,
-        STL: 0,
-        BLK: 0,
-        PF: 0,
         "+/-": 0,
-        games: 0,
+        TRB: 0,
+        trueShooting: 0,
+        assistToTurnover: 0,
+        stocks: 0,
+        games: 0,  // To keep track of the number of games
+        minutesPlayed: 0,
+        usage: 0
       };
     }
-    aggregatedData[row.player_name].MP += parseFloat(row.MP);
-    aggregatedData[row.player_name].FGA += parseFloat(row.FGA);
-    aggregatedData[row.player_name].FTA += parseFloat(row.FTA);
-    aggregatedData[row.player_name].TOV += parseFloat(row.TOV);
-    aggregatedData[row.player_name].PTS += parseFloat(row.PTS);
-    aggregatedData[row.player_name].TRB += parseFloat(row.TRB);
-    aggregatedData[row.player_name].AST += parseFloat(row.AST);
-    aggregatedData[row.player_name].STL += parseFloat(row.STL);
-    aggregatedData[row.player_name].BLK += parseFloat(row.BLK);
-    aggregatedData[row.player_name].PF += parseFloat(row.PF);
-    aggregatedData[row.player_name]["+/-"] += parseFloat(row["+/-"]);
-    aggregatedData[row.player_name].games += 1;
+
+    // Sum up the values
+    playerData[playerName].PTS += row.PTS;
+    playerData[playerName]["+/-"] += row["+/-"];
+    playerData[playerName].TRB += row.TRB;
+    playerData[playerName].trueShooting += row.trueShooting;
+    playerData[playerName].assistToTurnover += row.assistToTurnover;
+    playerData[playerName].stocks += row.stocks;
+    playerData[playerName].minutesPlayed += row.minutesPlayed;
+    playerData[playerName].usage += row.usage;
+    playerData[playerName].games += 1;
   });
 
-  Object.keys(aggregatedData).forEach((player) => {
-    Object.keys(aggregatedData[player]).forEach((key) => {
-      if (key !== "games") {
-        aggregatedData[player][key] /= aggregatedData[player].games;
-      }
-    });
-    aggregatedData[player].usage = estimateUsageRate(aggregatedData[player]);
-    aggregatedData[player].trueShooting =
-      aggregatedData[player].PTS /
-      (2 * (aggregatedData[player].FGA + 0.44 * aggregatedData[player].FTA));
-    aggregatedData[player].assistToTurnover =
-      aggregatedData[player].AST / aggregatedData[player].TOV;
-    aggregatedData[player].stocks =
-      aggregatedData[player].STL + aggregatedData[player].BLK;
+  // Average the values where appropriate
+  Object.keys(playerData).forEach(player => {
+    playerData[player].trueShooting /= playerData[player].games;
+    playerData[player].assistToTurnover /= playerData[player].games;
+    playerData[player].stocks /= playerData[player].games;
+    playerData[player].minutesPlayed /= playerData[player].games;
+    playerData[player].usage /= playerData[player].games;
   });
 
-  return aggregatedData;
+  return playerData;
 }
 
 function normalizeData(data) {
@@ -86,7 +78,7 @@ function normalizeData(data) {
     "TRB",
     "trueShooting",
     "assistToTurnover",
-    "stocks",
+    "stocks"
   ];
   const minMax = {};
 
@@ -98,14 +90,17 @@ function normalizeData(data) {
   Object.keys(data).forEach((player) => {
     normalizedData[player] = {};
     stats.forEach((stat) => {
-      normalizedData[player][stat] =
-        (data[player][stat] - minMax[stat].min) /
-        (minMax[stat].max - minMax[stat].min);
+      const { min, max } = minMax[stat];
+      normalizedData[player][stat] = min === max ? 0 : (data[player][stat] - min) / (max - min);
     });
+    normalizedData[player]["minutesPlayed"] = data[player]["minutesPlayed"];
+    normalizedData[player]["usage"] = data[player]["usage"];
   });
 
   return normalizedData;
 }
+
+
 
 function trainModel(data) {
   const features = data.map((row) => [row.minutes, row.usage]);
@@ -139,51 +134,38 @@ async function initializeModel() {
             value === "Did Not Dress" ||
             value === "Not With Team"
         )
-    );
-    logger.info(`Loaded ${cleanedBoxScores.length} box scores`);
-
-    // Calculate additional metrics before aggregation
-    logger.info("Calculating additional metrics...");
-    const enrichedBoxScores = cleanedBoxScores.map(row => {
+    ).map(row => {
       const trueShooting = ((+row.PTS) / (2 * (+row.FGA + 0.44 * +row.FTA))) || 0;
       const assistToTurnover = (+row.AST / +row.TOV) || 0;
       const stocks = (+row.STL + +row.BLK) || 0;
       const minutesPlayed = parseFloat(row.MP.split(':')[0]) + parseFloat(row.MP.split(':')[1]) / 60;
       const usage = ((+row.FGA + 0.44 * +row.FTA + +row.TOV) / minutesPlayed) || 0;
       return {
-        ...row,
+        player_name: row.player_name,
+        PTS: +row.PTS,
+        "+/-": +row["+/-"],  // Ensure plus/minus is treated as a number
+        TRB: +row.TRB,
         trueShooting: isFinite(trueShooting) ? trueShooting : 0,
         assistToTurnover: isFinite(assistToTurnover) ? assistToTurnover : 0,
-        stocks,
-        minutesPlayed,
-        usage,
-        PTS: +row.PTS,
-        '+/-': +row['+/-'],  // Ensure plus/minus is treated as a number
-        TRB: +row.TRB
+        stocks: isFinite(stocks) ? stocks : 0,
+        minutesPlayed: isFinite(minutesPlayed) ? minutesPlayed : 0,
+        usage: isFinite(usage) ? usage : 0
       };
-    });
-
-    // Remove unnecessary columns
-    const necessaryColumns = ['player_name', 'PTS', '+/-', 'TRB', 'trueShooting', 'assistToTurnover', 'stocks', 'minutesPlayed', 'usage'];
-    const reducedBoxScores = enrichedBoxScores.map(row => {
-      const reducedRow = {};
-      necessaryColumns.forEach(col => {
-        reducedRow[col] = row[col];
-      });
-      return reducedRow;
-    });
+    }).filter(row => row.minutesPlayed >= 3);
+    
+    logger.info(`Loaded ${cleanedBoxScores.length} cleaned box scores`);
 
     // Write cleaned and reduced box scores to CSV with headers
-    const reducedHeaders = necessaryColumns.join(",");
+    const reducedHeaders = Object.keys(cleanedBoxScores[0]).join(",");
     fs.writeFileSync(
       "./data/cleaned_boxscore.csv",
-      reducedHeaders + "\n" + reducedBoxScores.map((e) => Object.values(e).join(",")).join("\n")
+      reducedHeaders + "\n" + cleanedBoxScores.map((e) => Object.values(e).join(",")).join("\n")
     );
     logger.info("Cleaned and reduced box scores written to ./data/cleaned_boxscore.csv");
 
     // Aggregate data
     logger.info("Aggregating data...");
-    const aggregatedData = aggregateData(reducedBoxScores);
+    const aggregatedData = aggregateDataByPlayer(cleanedBoxScores);
     logger.info(`Aggregated data for ${Object.keys(aggregatedData).length} players`);
 
     // Remove any null rows after aggregation
@@ -192,10 +174,10 @@ async function initializeModel() {
     );
 
     // Write aggregated data to CSV with headers
-    const aggregatedHeaders = Object.keys(finalAggregatedData[0]).join(",");
+    const aggregatedHeaders = Object.keys(aggregatedData[Object.keys(aggregatedData)[0]]).join(",");
     fs.writeFileSync(
       "./data/aggregatedData.csv",
-      aggregatedHeaders + "\n" + finalAggregatedData.map((e) => Object.values(e).join(",")).join("\n")
+      aggregatedHeaders + "\n" + Object.values(aggregatedData).map((e) => Object.values(e).join(",")).join("\n")
     );
     logger.info("Aggregated data written to ./data/aggregatedData.csv");
 

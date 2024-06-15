@@ -131,44 +131,84 @@ async function initializeModel() {
     const cleanedBoxScores = boxScores.filter(
       (row) =>
         !Object.values(row).some(
-          (value) => value === "NaN" || value === null || value === "" || value === "Did Not Play" || value === "Did Not Dress"
+          (value) =>
+            value === "NaN" ||
+            value === null ||
+            value === "" ||
+            value === "Did Not Play" ||
+            value === "Did Not Dress" ||
+            value === "Not With Team"
         )
     );
     logger.info(`Loaded ${cleanedBoxScores.length} box scores`);
+
+    // Calculate additional metrics before aggregation
+    logger.info("Calculating additional metrics...");
+    const enrichedBoxScores = cleanedBoxScores.map(row => {
+      const trueShooting = ((+row.PTS) / (2 * (+row.FGA + 0.44 * +row.FTA))) || 0;
+      const assistToTurnover = (+row.AST / +row.TOV) || 0;
+      const stocks = (+row.STL + +row.BLK) || 0;
+      const minutesPlayed = parseFloat(row.MP.split(':')[0]) + parseFloat(row.MP.split(':')[1]) / 60;
+      const usage = ((+row.FGA + 0.44 * +row.FTA + +row.TOV) / minutesPlayed) || 0;
+      return {
+        ...row,
+        trueShooting: isFinite(trueShooting) ? trueShooting : 0,
+        assistToTurnover: isFinite(assistToTurnover) ? assistToTurnover : 0,
+        stocks,
+        minutesPlayed,
+        usage,
+        PTS: +row.PTS,
+        '+/-': +row['+/-'],  // Ensure plus/minus is treated as a number
+        TRB: +row.TRB
+      };
+    });
+
+    // Remove unnecessary columns
+    const necessaryColumns = ['player_name', 'PTS', '+/-', 'TRB', 'trueShooting', 'assistToTurnover', 'stocks', 'minutesPlayed', 'usage'];
+    const reducedBoxScores = enrichedBoxScores.map(row => {
+      const reducedRow = {};
+      necessaryColumns.forEach(col => {
+        reducedRow[col] = row[col];
+      });
+      return reducedRow;
+    });
+
+    // Write cleaned and reduced box scores to CSV with headers
+    const reducedHeaders = necessaryColumns.join(",");
     fs.writeFileSync(
-        "./data/cleaned_boxscore.csv",
-        Object.values(cleanedBoxScores)
-          .map((e) => Object.values(e).join(","))
-          .join("\n")
-      );
+      "./data/cleaned_boxscore.csv",
+      reducedHeaders + "\n" + reducedBoxScores.map((e) => Object.values(e).join(",")).join("\n")
+    );
+    logger.info("Cleaned and reduced box scores written to ./data/cleaned_boxscore.csv");
 
     // Aggregate data
     logger.info("Aggregating data...");
-    const aggregatedData = aggregateData(cleanedBoxScores);
-    logger.info(
-      `Aggregated data for ${Object.keys(aggregatedData).length} players`
+    const aggregatedData = aggregateData(reducedBoxScores);
+    logger.info(`Aggregated data for ${Object.keys(aggregatedData).length} players`);
+
+    // Remove any null rows after aggregation
+    const finalAggregatedData = Object.values(aggregatedData).filter(
+      row => !Object.values(row).some(value => value === null || value === "NaN")
     );
 
-    // Write aggregated data to CSV
+    // Write aggregated data to CSV with headers
+    const aggregatedHeaders = Object.keys(finalAggregatedData[0]).join(",");
     fs.writeFileSync(
       "./data/aggregatedData.csv",
-      Object.values(aggregatedData)
-        .map((e) => Object.values(e).join(","))
-        .join("\n")
+      aggregatedHeaders + "\n" + finalAggregatedData.map((e) => Object.values(e).join(",")).join("\n")
     );
     logger.info("Aggregated data written to ./data/aggregatedData.csv");
 
     // Normalize data
     logger.info("Normalizing data...");
-    const normalizedData = normalizeData(aggregatedData);
+    const normalizedData = normalizeData(finalAggregatedData);
     logger.info("Data normalization complete");
 
-    // Write normalized data to CSV
+    // Write normalized data to CSV with headers
+    const normalizedHeaders = Object.keys(normalizedData[0]).join(",");
     fs.writeFileSync(
       "./data/normalizedData.csv",
-      Object.values(normalizedData)
-        .map((e) => Object.values(e).join(","))
-        .join("\n")
+      normalizedHeaders + "\n" + Object.values(normalizedData).map((e) => Object.values(e).join(",")).join("\n")
     );
     logger.info("Normalized data written to ./data/normalizedData.csv");
 
@@ -185,6 +225,7 @@ async function initializeModel() {
     logger.error(`Error initializing model: ${error.message}`);
   }
 }
+
 
 module.exports = {
   initializeModel,

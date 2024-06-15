@@ -1,3 +1,4 @@
+// PlayerList.js
 import React from "react";
 import {
   Container,
@@ -5,15 +6,12 @@ import {
   Typography,
   Select,
   MenuItem,
-  Card,
-  CardContent,
-  CardMedia,
   Grid,
 } from "@mui/material";
 import PlayerModal from "./PlayerModal";
 import TeamSummaryCard from "./TeamSummaryCard";
+import PlayerCard from "./PlayerCard";
 import { TEAMS, SEASONS } from "../constants";
-
 
 function PlayerList({
   season,
@@ -63,20 +61,7 @@ function PlayerList({
         <Grid container spacing={2}>
           {players.map((player) => (
             <Grid item xs={12} sm={6} md={4} key={player.playerId}>
-              <Card onClick={() => handleCardClick(player)}>
-                <CardMedia
-                  component="img"
-                  height="140"
-                  image={`https://cdn.nba.com/headshots/nba/latest/1040x760/${player.playerId}.png`}
-                  alt={`${player.playerName}'s headshot`}
-                />
-                <CardContent>
-                  <Typography variant="h6">{player.playerName}</Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    Position: {player.position}
-                  </Typography>
-                </CardContent>
-              </Card>
+              <PlayerCard player={player} onClick={handleCardClick} />
             </Grid>
           ))}
         </Grid>

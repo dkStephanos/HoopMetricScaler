@@ -51,7 +51,7 @@ function PlayerModal({ player, playerStats, onClose }) {
       >
         {player.name}
         <img
-          src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${player.id}.png`}
+          src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${player.playerId}.png`}
           alt={`${player.name}'s headshot`}
           style={{ width: "100px", height: "auto", float: "right" }}
         />

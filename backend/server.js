@@ -1,28 +1,19 @@
 const express = require('express');
 const cors = require('cors');
+const { getExtendedPlayerInfo } = require('./utils');
 const nba = require('nba');
 const app = express();
 const port = 3001;
 
 app.use(cors());
 
-
 // Endpoints
-app.get('/player/:name', async (req, res) => {
-    const player = nba.findPlayer(req.params.name);
-    if (player) {
-        const playerInfo = await nba.stats.playerInfo({ PlayerID: player.playerId });
-        res.json(playerInfo);
-    } else {
-        res.status(404).send('Player not found');
-    }
-});
 
 app.get('/player-stats/:id', async (req, res) => {
     const { id } = req.params;
     const { season } = req.query;
     try {
-        const playerStats = await nba.stats.playerProfile({ PlayerID: playerId, Season: season });
+        const playerStats = await nba.stats.playerProfile({ PlayerID: id, Season: season });
         res.json(playerStats);
     } catch (error) {
         res.status(500).send('Error fetching player stats');
@@ -33,11 +24,16 @@ app.get('/team-player-dashboard/:teamId', async (req, res) => {
     const { teamId } = req.params;
     const { season } = req.query;
     try {
-      const teamPlayerDashboard = await nba.stats.teamPlayerDashboard({ TeamID: teamId, Season: season });
-      res.json(teamPlayerDashboard);
+        const teamPlayerDashboard = await nba.stats.teamPlayerDashboard({ TeamID: teamId, Season: season });
+        const players = teamPlayerDashboard.playersSeasonTotals;
+        const extendedPlayers = await getExtendedPlayerInfo(players);
+        res.json({
+            teamOverall: teamPlayerDashboard.teamOverall,
+            playersSeasonTotals: extendedPlayers
+        });
     } catch (error) {
-      console.error('Error fetching team player dashboard:', error);
-      res.status(500).send('Error fetching team player dashboard');
+        console.error('Error fetching team player dashboard:', error);
+        res.status(500).send('Error fetching team player dashboard');
     }
 });
 

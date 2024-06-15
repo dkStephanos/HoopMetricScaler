@@ -11,9 +11,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "nba": "^4.15.0",
+    "regression": "^2.0.1",
     "winston": "^3.13.0"
   }
 }

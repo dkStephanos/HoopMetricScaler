@@ -112,7 +112,16 @@ function TeamSummaryCard({ teamSummary }) {
         ) : (
           <>
             <Typography>Loading team summary...</Typography>
-            <CircularProgress />
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: 400,
+              }}
+            >
+              <CircularProgress />
+            </div>
           </>
         )}
       </CardContent>

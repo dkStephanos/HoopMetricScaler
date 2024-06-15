@@ -70,14 +70,19 @@ function PlayerModal({ player, playerStats, onClose }) {
       >
         <div style={{ flex: 1, padding: "10px" }}>
           <h4>{player.playerName}</h4>
-          <p>Position: {player.position}, Height: {player.height}, Age: {player.age}</p>
+          <p>
+            Position: {player.position}, Height: {player.height}, Age:{" "}
+            {player.age}
+          </p>
         </div>
         <div style={{ flex: 2, padding: "10px" }}>
-            <h4>Overall Season Stats</h4>
-            <p>
-              {topLevelStats.map((stat) => ` ${stat.label}: ${stat.value}`).toString()}
-            </p>
-          </div>
+          <h4>Overall Season Stats</h4>
+          <p>
+            {topLevelStats
+              .map((stat) => ` ${stat.label}: ${stat.value}`)
+              .toString()}
+          </p>
+        </div>
         <img
           src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${player.playerId}.png`}
           alt={`${player.playerName}'s headshot`}
@@ -94,7 +99,9 @@ function PlayerModal({ player, playerStats, onClose }) {
           {playerStats?.seasonTotalsRegularSeason?.length > 0 && (
             <Tab label="Regular Season" />
           )}
-          {playerStats?.seasonTotalsPostSeason?.length > 0 && <Tab label="Post Season" />}
+          {playerStats?.seasonTotalsPostSeason?.length > 0 && (
+            <Tab label="Post Season" />
+          )}
         </Tabs>
         {playerStats ? (
           tabValue === 0 ? (
@@ -106,18 +113,29 @@ function PlayerModal({ player, playerStats, onClose }) {
                 hideFooter
               />
             </div>
-          ) : tabValue === 1 && (
-            <div style={{ height: 400, width: "100%" }}>
-              <DataGrid
-                rows={addIdToRows(playerStats.seasonTotalsPostSeason)}
-                columns={columns}
-                autoHeight
-                hideFooter
-              />
-            </div>
+          ) : (
+            tabValue === 1 && (
+              <div style={{ height: 400, width: "100%" }}>
+                <DataGrid
+                  rows={addIdToRows(playerStats.seasonTotalsPostSeason)}
+                  columns={columns}
+                  autoHeight
+                  hideFooter
+                />
+              </div>
+            )
           )
         ) : (
-          <CircularProgress />
+          <DialogContent
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: 400,
+            }}
+          >
+            <CircularProgress />
+          </DialogContent>
         )}
       </DialogContent>
       <DialogActions>

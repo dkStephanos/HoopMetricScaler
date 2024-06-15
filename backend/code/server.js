@@ -1,12 +1,33 @@
 const express = require('express');
 const cors = require('cors');
-const { getExtendedPlayerInfo } = require('./utils');
 const nba = require('nba');
-const logger = require('./logger'); // Import the logger
+const bodyParser = require('body-parser');
+const { getExtendedPlayerInfo } = require('./utils');
+const { initializeModel } = require('./ml'); // Adjust the path as needed
+const logger = require('./logger');
+const fs = require('fs');
+
 const app = express();
 const port = 3001;
 
 app.use(cors());
+app.use(bodyParser.json());
+
+app.post('/scale-stats', (req, res) => {
+    const { minutes, usage, selectedRows } = req.body;
+    const model = JSON.parse(fs.readFileSync('./model.json'));
+
+    if (!model) {
+        return res.status(400).send('Model not trained yet');
+    }
+
+    if (!selectedRows || selectedRows.length === 0) {
+        return res.status(400).send('No rows selected');
+    }
+
+    const scaledStats = model.predict([minutes, usage]);
+    res.json({ scaledStats: scaledStats[1] });
+});
 
 app.get('/player-stats/:id', async (req, res) => {
     const { id } = req.params;
@@ -39,6 +60,8 @@ app.get('/team-player-dashboard/:teamId', async (req, res) => {
     }
 });
 
-app.listen(port, () => {
-    logger.info(`Server is running on port ${port}`);
+initializeModel().then(() => {
+    app.listen(port, () => {
+        logger.info(`Server is running on port ${port}`);
+    });
 });

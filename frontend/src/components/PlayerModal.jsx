@@ -40,6 +40,14 @@ function PlayerModal({ player, playerStats, onClose }) {
     { field: "pts", headerName: "PTS", flex: 1, minWidth: 50 },
   ];
 
+  const rowHeight = 52;
+  const regularSeasonHeight = playerStats
+    ? (playerStats.seasonTotalsRegularSeason.length * rowHeight) + 80
+    : 400;
+  const postSeasonHeight = playerStats
+    ? playerStats.seasonTotalsPostSeason.length * rowHeight
+    : 400;
+
   const addIdToRows = (rows) =>
     rows.map((row, index) => ({ ...row, id: index }));
 
@@ -86,7 +94,10 @@ function PlayerModal({ player, playerStats, onClose }) {
         </div>
         <img
           src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${player.playerId}.png`}
-          onError={(e) => { e.target.onerror = null; e.target.src = `${process.env.PUBLIC_URL}/KevinHartHeadshot.webp`; }}
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = `${process.env.PUBLIC_URL}/KevinHartHeadshot.webp`;
+          }}
           alt={`${player.playerName}'s headshot`}
           style={{ width: "150px", height: "auto", float: "right" }}
         />
@@ -107,7 +118,7 @@ function PlayerModal({ player, playerStats, onClose }) {
         </Tabs>
         {playerStats ? (
           tabValue === 0 ? (
-            <div style={{ height: 400, width: "100%" }}>
+            <div style={{ height: regularSeasonHeight, width: "100%" }}>
               <DataGrid
                 rows={addIdToRows(playerStats.seasonTotalsRegularSeason)}
                 columns={columns}
@@ -117,7 +128,7 @@ function PlayerModal({ player, playerStats, onClose }) {
             </div>
           ) : (
             tabValue === 1 && (
-              <div style={{ height: 400, width: "100%" }}>
+              <div style={{ height: postSeasonHeight, width: "100%" }}>
                 <DataGrid
                   rows={addIdToRows(playerStats.seasonTotalsPostSeason)}
                   columns={columns}
@@ -139,6 +150,9 @@ function PlayerModal({ player, playerStats, onClose }) {
             <CircularProgress />
           </div>
         )}
+        <div style={{ marginTop: 20 }}>
+          <RadarChart />
+        </div>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Close</Button>

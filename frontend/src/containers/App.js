@@ -30,9 +30,33 @@ function App() {
     setPlayerStats(data);
   };
 
+  const handleCloseModal = () => {
+    setSelectedPlayer(null);
+    setPlayerStats(null);
+  };
+
+  const handleSeasonChange = (e) => {
+    setSeason(e.target.value);
+  };
+
+  const handleTeamChange = (e) => {
+    setTeamID(e.target.value);
+  };
+
   return (
     <div>
-      <PlayerList />
+      <PlayerList
+      season={season}
+      teamID={teamID}
+      players={players}
+      teamData={teamData}
+      selectedPlayer={selectedPlayer}
+      playerStats={playerStats}
+      handleSeasonChange={handleSeasonChange}
+      handleTeamChange={handleTeamChange}
+      handleCardClick={handleCardClick}
+      handleCloseModal={handleCloseModal}
+    />
     </div>
   );
 }

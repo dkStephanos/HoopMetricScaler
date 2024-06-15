@@ -51,9 +51,6 @@ function PlayerModal({ player, playerStats, onClose }) {
   const addIdToRows = (rows) =>
     rows.map((row, index) => ({ ...row, id: index }));
 
-  const age =
-    new Date().getFullYear() - new Date(player.birthdate).getFullYear();
-
   const topLevelStats = [
     { label: "PTS", value: player.pts },
     { label: "REB", value: player.reb },

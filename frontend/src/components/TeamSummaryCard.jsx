@@ -11,7 +11,7 @@ import {
   TableContainer,
   TableRow,
   Paper,
-  Grow ,
+  Grow,
 } from "@mui/material";
 
 function TeamSummaryCard({ teamSummary }) {
@@ -19,7 +19,7 @@ function TeamSummaryCard({ teamSummary }) {
     <Card sx={{ mb: 4 }}>
       <CardContent>
         {teamSummary ? (
-          <Grow  in={Boolean(teamSummary)} timeout={1000}>
+          <Grow in={Boolean(teamSummary)} timeout={1000}>
             <div>
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
@@ -31,7 +31,9 @@ function TeamSummaryCard({ teamSummary }) {
                     Games Played: {teamSummary.gp}
                   </Typography>
                   <Typography variant="body2">Wins: {teamSummary.w}</Typography>
-                  <Typography variant="body2">Losses: {teamSummary.l}</Typography>
+                  <Typography variant="body2">
+                    Losses: {teamSummary.l}
+                  </Typography>
                   <Typography variant="body2">
                     Win %: {teamSummary.wPct}
                   </Typography>
@@ -111,21 +113,20 @@ function TeamSummaryCard({ teamSummary }) {
                 </Table>
               </TableContainer>
             </div>
-          </Grow >
+          </Grow>
         ) : (
-          <>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              height: 400,
+            }}
+          >
             <Typography>Loading team summary...</Typography>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                height: 400,
-              }}
-            >
-              <CircularProgress />
-            </div>
-          </>
+            <CircularProgress />
+          </div>
         )}
       </CardContent>
     </Card>

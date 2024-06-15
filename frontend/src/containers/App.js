@@ -1,7 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import { fetchTeamStats, fetchPlayerStats } from "../actions";
-import PlayerList from '../components/PlayerList';
+import PlayerList from "../components/PlayerList";
+import TeamSummaryCard from "../components/TeamSummaryCard";
+import {
+  Box,
+  Typography,
+  Select,
+  MenuItem,
+  Container
+} from "@mui/material";
 import { TEAMS, SEASONS } from "../constants";
+
 
 function App() {
   const [season, setSeason] = useState(SEASONS[0]);
@@ -19,10 +28,9 @@ function App() {
       setPlayers(data["playersSeasonTotals"]);
       setTeamData(data["teamOverall"][0]);
     };
-  
+
     fetchAndSetData();
   }, [season, teamID]);
-  
 
   const handleCardClick = async (player) => {
     setSelectedPlayer(player);
@@ -44,20 +52,47 @@ function App() {
   };
 
   return (
-    <div>
-      <PlayerList
-      season={season}
-      teamID={teamID}
-      players={players}
-      teamData={teamData}
-      selectedPlayer={selectedPlayer}
-      playerStats={playerStats}
-      handleSeasonChange={handleSeasonChange}
-      handleTeamChange={handleTeamChange}
-      handleCardClick={handleCardClick}
-      handleCloseModal={handleCloseModal}
-    />
-    </div>
+    <Container maxWidth="xl">
+      <Box sx={{ my: 4 }}>
+        <Typography variant="h4" component="h1" gutterBottom>
+          NBA Players
+        </Typography>
+        <Select
+          value={season}
+          onChange={handleSeasonChange}
+          displayEmpty
+          fullWidth
+          sx={{ mb: 2 }}
+        >
+          {SEASONS.map((season) => (
+            <MenuItem key={season} value={season}>
+              {season}
+            </MenuItem>
+          ))}
+        </Select>
+        <Select
+          value={teamID}
+          onChange={handleTeamChange}
+          displayEmpty
+          fullWidth
+          sx={{ mb: 2 }}
+        >
+          {TEAMS.map((team) => (
+            <MenuItem key={team.id} value={team.id}>
+              {team.name}
+            </MenuItem>
+          ))}
+        </Select>
+      </Box>
+      <TeamSummaryCard teamSummary={teamData} />
+      {teamData && <PlayerList
+        players={players}
+        selectedPlayer={selectedPlayer}
+        playerStats={playerStats}
+        handleCardClick={handleCardClick}
+        handleCloseModal={handleCloseModal}
+      />}
+    </Container>
   );
 }
 

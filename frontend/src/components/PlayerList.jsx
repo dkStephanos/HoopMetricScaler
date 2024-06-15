@@ -7,6 +7,7 @@ import {
   Select,
   MenuItem,
   Grid,
+  Fade
 } from "@mui/material";
 import PlayerModal from "./PlayerModal";
 import TeamSummaryCard from "./TeamSummaryCard";
@@ -58,6 +59,8 @@ function PlayerList({
           ))}
         </Select>
         <TeamSummaryCard teamSummary={teamData} />
+        <Fade in={!!players?.length > 0} timeout={1000}>
+
         <Grid container spacing={2}>
           {players.map((player) => (
             <Grid item xs={12} sm={6} md={4} lg={3} key={player.playerId}>
@@ -65,6 +68,8 @@ function PlayerList({
             </Grid>
           ))}
         </Grid>
+        </Fade>
+
       </Box>
       {selectedPlayer && (
         <PlayerModal

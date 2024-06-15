@@ -11,6 +11,7 @@ import {
   Tabs,
   Typography,
   Slider,
+  Paper,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import RadarChart from "./RadarChart"; // Make sure to import RadarChart
@@ -46,21 +47,45 @@ function PlayerModal({ player, playerStats, onClose }) {
     rows.map((row, index) => ({ ...row, id: index }));
 
   const topLevelStats = [
-    { label: "PTS", value: player.pts },
-    { label: "REB", value: player.reb },
-    { label: "AST", value: player.ast },
-    { label: "BLK", value: player.blk },
-    { label: "STL", value: player.stl },
+    {
+      label: "PIE",
+      value: playerStats ? playerStats.playerHeadlineStats[0].pie : 'n/a',
+    },
+    {
+      label: "PTS",
+      value: playerStats ? playerStats.playerHeadlineStats[0].pts : 'n/a',
+    },
+    {
+      label: "REB",
+      value: playerStats ? playerStats.playerHeadlineStats[0].reb : 'n/a',
+    },
+    {
+      label: "AST",
+      value: playerStats ? playerStats.playerHeadlineStats[0].ast : 'n/a',
+    },
   ];
 
   const [tabValue, setTabValue] = useState(0);
-  const [selectedRows, setSelectedRows] = useState([]);
   const [sliderValues, setSliderValues] = useState({ minutes: 30, usage: 20 });
   const [showContent, setShowContent] = useState(false);
+  const [selectedRows, setSelectedRows] = useState([]);
+  const [selectedIds, setSelectedIds] = useState([]);
 
   useEffect(() => {
     if (playerStats) {
       setShowContent(true);
+      const initialSelectedRows = [
+        ...(playerStats.seasonTotalsRegularSeason.length > 0
+          ? [playerStats.seasonTotalsRegularSeason[0]]
+          : []),
+        ...(playerStats.seasonTotalsPostSeason.length > 0
+          ? [playerStats.seasonTotalsPostSeason[0]]
+          : []),
+      ];
+      const initialSelectedIds = initialSelectedRows.map((row) => row.id);
+
+      setSelectedRows(initialSelectedRows);
+      setSelectedIds(initialSelectedIds);
     }
   }, [playerStats]);
 
@@ -72,39 +97,60 @@ function PlayerModal({ player, playerStats, onClose }) {
     setSliderValues((prevValues) => ({ ...prevValues, [type]: newValue }));
   };
 
+  const handleSelectionChange = (ids, type) => {
+    const selectedIDs = new Set(ids);
+    const selectedRowData =
+      type === "regular"
+        ? playerStats.seasonTotalsRegularSeason.filter((row) =>
+            selectedIDs.has(row.id)
+          )
+        : playerStats.seasonTotalsPostSeason.filter((row) =>
+            selectedIDs.has(row.id)
+          );
+    setSelectedRows((prev) => [
+      ...prev.filter((row) => row.type !== type),
+      ...selectedRowData,
+    ]);
+    setSelectedIds(Array.from(selectedIDs));
+  };
+
   return (
     <Dialog open={Boolean(player)} onClose={onClose} maxWidth="lg" fullWidth>
-      <DialogTitle
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <div style={{ flex: 1, padding: "10px" }}>
-          <h4>{player.playerName}</h4>
-          <p>
-            Position: {player.position}, Height: {player.height}, Age:{" "}
-            {player.age}
-          </p>
-        </div>
-        <div style={{ flex: 2, padding: "10px" }}>
-          <h4>Overall Season Stats</h4>
-          <p>
-            {topLevelStats
-              .map((stat) => ` ${stat.label}: ${stat.value}`)
-              .toString()}
-          </p>
-        </div>
-        <img
-          src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${player.playerId}.png`}
-          onError={(e) => {
-            e.target.onerror = null;
-            e.target.src = `${process.env.PUBLIC_URL}/KevinHartHeadshot.webp`;
+      <DialogTitle>
+        <Paper
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
           }}
-          alt={`${player.playerName}'s headshot`}
-          style={{ width: "150px", height: "auto", float: "right" }}
-        />
+        >
+          <div style={{ flex: 1, padding: "10px" }}>
+            <h3>{player.playerName}: <i>{playerStats ? playerStats.commonPlayerInfo[0].position : "-"}</i>
+            </h3>
+            <p>
+              Height:{" "}
+              {playerStats ? playerStats.commonPlayerInfo[0].height : "-"}, Weight:{" "}
+              {playerStats ? playerStats.commonPlayerInfo[0].weight : "-"}
+            </p>
+          </div>
+          <div style={{ flex: 2, padding: "10px" }}>
+            <h3>Overall Season Stats</h3>
+            <p>
+              {topLevelStats
+                .map((stat) => ` ${stat.label}: ${stat.value}`)
+                .toString()}
+            </p>
+          </div>
+          <img
+            src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${player.playerId}.png`}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = `${process.env.PUBLIC_URL}/KevinHartHeadshot.webp`;
+            }}
+            alt={`${player.playerName}'s headshot`}
+            style={{ width: "150px", height: "auto", float: "right" }}
+          />
+        </Paper>
       </DialogTitle>
       <DialogContent>
         <Tabs
@@ -127,14 +173,10 @@ function PlayerModal({ player, playerStats, onClose }) {
               autoHeight
               hideFooter
               checkboxSelection
-              onSelectionModelChange={(ids) => {
-                const selectedIDs = new Set(ids);
-                const selectedRowData =
-                  playerStats.seasonTotalsRegularSeason.filter((row) =>
-                    selectedIDs.has(row.id)
-                  );
-                setSelectedRows(selectedRowData);
-              }}
+              selectionModel={selectedIds}
+              onSelectionModelChange={(ids) =>
+                handleSelectionChange(ids, "regular")
+              }
             />
           ) : (
             tabValue === 1 && (
@@ -144,14 +186,10 @@ function PlayerModal({ player, playerStats, onClose }) {
                 autoHeight
                 hideFooter
                 checkboxSelection
-                onSelectionModelChange={(ids) => {
-                  const selectedIDs = new Set(ids);
-                  const selectedRowData =
-                    playerStats.seasonTotalsPostSeason.filter((row) =>
-                      selectedIDs.has(row.id)
-                    );
-                  setSelectedRows(selectedRowData);
-                }}
+                selectionModel={selectedIds}
+                onSelectionModelChange={(ids) =>
+                  handleSelectionChange(ids, "playoff")
+                }
               />
             )
           )

@@ -12,7 +12,7 @@ function PlayerCard({ player, onClick }) {
           style={{ objectFit: 'contain', height: '100%', width: '100%' }}
         />
       </div>
-      <CardContent>
+      <CardContent style={{ textAlign: 'center' }}>
         <Typography variant="h6">{player.playerName}</Typography>
       </CardContent>
     </Card>

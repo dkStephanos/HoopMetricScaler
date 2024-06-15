@@ -81,7 +81,7 @@ function PlayerList({
           ))}
         </Grid>
       </Box>
-      {selectedPlayer && playerStats && (
+      {selectedPlayer && (
         <PlayerModal
           player={selectedPlayer}
           playerStats={playerStats}

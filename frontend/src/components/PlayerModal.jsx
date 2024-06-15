@@ -7,6 +7,8 @@ import {
   Button,
   Typography,
   CircularProgress,
+  Tab,
+  Tabs,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 
@@ -40,6 +42,23 @@ function PlayerModal({ player, playerStats, onClose }) {
   const addIdToRows = (rows) =>
     rows.map((row, index) => ({ ...row, id: index }));
 
+  const age =
+    new Date().getFullYear() - new Date(player.birthdate).getFullYear();
+
+  const topLevelStats = [
+    { label: "PTS", value: player.pts },
+    { label: "REB", value: player.reb },
+    { label: "AST", value: player.ast },
+    { label: "BLK", value: player.blk },
+    { label: "STL", value: player.stl },
+  ];
+
+  const [tabValue, setTabValue] = React.useState(0);
+
+  const handleTabChange = (event, newValue) => {
+    setTabValue(newValue);
+  };
+
   return (
     <Dialog open={Boolean(player)} onClose={onClose} maxWidth="lg" fullWidth>
       <DialogTitle
@@ -49,21 +68,36 @@ function PlayerModal({ player, playerStats, onClose }) {
           alignItems: "center",
         }}
       >
-        {player.name}
+        <div style={{ flex: 1, padding: "10px" }}>
+          <h4>{player.playerName}</h4>
+          <p>Position: {player.position}, Height: {player.height}, Age: {player.age}</p>
+        </div>
+        <div style={{ flex: 2, padding: "10px" }}>
+            <h4>Overall Season Stats</h4>
+            <p>
+              {topLevelStats.map((stat) => ` ${stat.label}: ${stat.value}`).toString()}
+            </p>
+          </div>
         <img
           src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${player.playerId}.png`}
-          alt={`${player.name}'s headshot`}
-          style={{ width: "100px", height: "auto", float: "right" }}
+          alt={`${player.playerName}'s headshot`}
+          style={{ width: "150px", height: "auto", float: "right" }}
         />
       </DialogTitle>
 
       <DialogContent>
-        <Typography>Team: {player.team}</Typography>
-        <Typography>Position: {player.position}</Typography>
-
+        <Tabs
+          value={tabValue}
+          onChange={handleTabChange}
+          aria-label="season stats tabs"
+        >
+          {playerStats?.seasonTotalsRegularSeason?.length > 0 && (
+            <Tab label="Regular Season" />
+          )}
+          {playerStats?.seasonTotalsPostSeason?.length > 0 && <Tab label="Post Season" />}
+        </Tabs>
         {playerStats ? (
-          <>
-            <Typography variant="h6">Regular Season Stats</Typography>
+          tabValue === 0 ? (
             <div style={{ height: 400, width: "100%" }}>
               <DataGrid
                 rows={addIdToRows(playerStats.seasonTotalsRegularSeason)}
@@ -72,34 +106,18 @@ function PlayerModal({ player, playerStats, onClose }) {
                 hideFooter
               />
             </div>
-
-            {playerStats.seasonTotalsPostSeason?.length > 0 && (
-              <>
-                <Typography variant="h6" style={{ marginTop: 60 }}>
-                  Post Season Stats
-                </Typography>
-                <div style={{ height: 400, width: "100%" }}>
-                  <DataGrid
-                    rows={addIdToRows(playerStats.seasonTotalsPostSeason)}
-                    columns={columns}
-                    autoHeight
-                    hideFooter
-                  />
-                </div>
-              </>
-            )}
-          </>
+          ) : tabValue === 1 && (
+            <div style={{ height: 400, width: "100%" }}>
+              <DataGrid
+                rows={addIdToRows(playerStats.seasonTotalsPostSeason)}
+                columns={columns}
+                autoHeight
+                hideFooter
+              />
+            </div>
+          )
         ) : (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              height: 400,
-            }}
-          >
-            <CircularProgress />
-          </div>
+          <CircularProgress />
         )}
       </DialogContent>
       <DialogActions>

@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const nba = require('nba');
-const { getPlayersForSeasonAndTeam, getAdvancedPlayerStats } = require('./utils');
 const app = express();
 const port = 3001;
 
@@ -23,7 +22,7 @@ app.get('/player-stats/:id', async (req, res) => {
     const { id } = req.params;
     const { season } = req.query;
     try {
-        const playerStats = await getAdvancedPlayerStats(id, season);
+        const playerStats = await nba.stats.playerProfile({ PlayerID: playerId, Season: season });
         res.json(playerStats);
     } catch (error) {
         res.status(500).send('Error fetching player stats');

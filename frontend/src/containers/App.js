@@ -2,15 +2,9 @@ import React, { useEffect, useState } from "react";
 import { fetchTeamStats, fetchPlayerStats } from "../actions";
 import PlayerList from "../components/PlayerList";
 import TeamSummaryCard from "../components/TeamSummaryCard";
-import {
-  Box,
-  Typography,
-  Select,
-  MenuItem,
-  Container
-} from "@mui/material";
+import PlayerFilterBar from "../components/PlayerFilterBar";
+import { Container } from "@mui/material";
 import { TEAMS, SEASONS } from "../constants";
-
 
 function App() {
   const [season, setSeason] = useState(SEASONS[0]);
@@ -53,45 +47,22 @@ function App() {
 
   return (
     <Container maxWidth="xl">
-      <Box sx={{ my: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          NBA Players
-        </Typography>
-        <Select
-          value={season}
-          onChange={handleSeasonChange}
-          displayEmpty
-          fullWidth
-          sx={{ mb: 2 }}
-        >
-          {SEASONS.map((season) => (
-            <MenuItem key={season} value={season}>
-              {season}
-            </MenuItem>
-          ))}
-        </Select>
-        <Select
-          value={teamID}
-          onChange={handleTeamChange}
-          displayEmpty
-          fullWidth
-          sx={{ mb: 2 }}
-        >
-          {TEAMS.map((team) => (
-            <MenuItem key={team.id} value={team.id}>
-              {team.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </Box>
+      <PlayerFilterBar
+        season={season}
+        teamID={teamID}
+        handleSeasonChange={handleSeasonChange}
+        handleTeamChange={handleTeamChange}
+      />
       <TeamSummaryCard teamSummary={teamData} />
-      {teamData && <PlayerList
-        players={players}
-        selectedPlayer={selectedPlayer}
-        playerStats={playerStats}
-        handleCardClick={handleCardClick}
-        handleCloseModal={handleCloseModal}
-      />}
+      {teamData && (
+        <PlayerList
+          players={players}
+          selectedPlayer={selectedPlayer}
+          playerStats={playerStats}
+          handleCardClick={handleCardClick}
+          handleCloseModal={handleCloseModal}
+        />
+      )}
     </Container>
   );
 }

@@ -5,7 +5,7 @@ import {
   DialogContent,
   DialogActions,
   Button,
-  Typography,
+  Fade,
   CircularProgress,
   Tab,
   Tabs,
@@ -117,42 +117,47 @@ function PlayerModal({ player, playerStats, onClose }) {
           )}
         </Tabs>
         {playerStats ? (
-          tabValue === 0 ? (
-            <div style={{ height: regularSeasonHeight, width: "100%" }}>
-              <DataGrid
-                rows={addIdToRows(playerStats.seasonTotalsRegularSeason)}
-                columns={columns}
-                autoHeight
-                hideFooter
-              />
-            </div>
-          ) : (
-            tabValue === 1 && (
-              <div style={{ height: postSeasonHeight, width: "100%" }}>
-                <DataGrid
-                  rows={addIdToRows(playerStats.seasonTotalsPostSeason)}
-                  columns={columns}
-                  autoHeight
-                  hideFooter
-                />
-              </div>
-            )
-          )
-        ) : (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              height: 400,
-            }}
-          >
-            <CircularProgress />
-          </div>
-        )}
-        <div style={{ marginTop: 20 }}>
-          {playerStats && <RadarChart />}
+  <Fade in={true} timeout={1000}>
+    <div>
+      {tabValue === 0 ? (
+        <div style={{ height: regularSeasonHeight, width: "100%" }}>
+          <DataGrid
+            rows={addIdToRows(playerStats.seasonTotalsRegularSeason)}
+            columns={columns}
+            autoHeight
+            hideFooter
+          />
         </div>
+      ) : (
+        tabValue === 1 && (
+          <div style={{ height: postSeasonHeight, width: "100%" }}>
+            <DataGrid
+              rows={addIdToRows(playerStats.seasonTotalsPostSeason)}
+              columns={columns}
+              autoHeight
+              hideFooter
+            />
+          </div>
+        )
+      )}
+      <div style={{ marginTop: 20 }}>
+        <RadarChart />
+      </div>
+    </div>
+  </Fade>
+) : (
+  <div
+    style={{
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      height: 400,
+    }}
+  >
+    <CircularProgress />
+  </div>
+)}
+
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Close</Button>

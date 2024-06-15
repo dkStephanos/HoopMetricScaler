@@ -76,10 +76,10 @@ function PlayerModal({ player, playerStats, onClose }) {
       setShowContent(true);
       const initialSelectedRows = [
         ...(playerStats.seasonTotalsRegularSeason.length > 0
-          ? [playerStats.seasonTotalsRegularSeason[0]]
+          ? [playerStats.seasonTotalsRegularSeason[playerStats.seasonTotalsRegularSeason.length - 1]]
           : []),
         ...(playerStats.seasonTotalsPostSeason.length > 0
-          ? [playerStats.seasonTotalsPostSeason[0]]
+          ? [playerStats.seasonTotalsPostSeason[playerStats.seasonTotalsPostSeason.length - 1]]
           : []),
       ];
       const initialSelectedIds = initialSelectedRows.map((row) => row.id);

@@ -18,12 +18,6 @@ function loadBoxScores() {
   });
 }
 
-function estimateUsageRate(playerStats) {
-  const usageRate =
-    (playerStats.FGA + 0.44 * playerStats.FTA + playerStats.TOV) /
-    playerStats.MP;
-  return usageRate;
-}
 
 function aggregateDataByPlayer(data) {
   const playerData = {};

@@ -1,58 +1,52 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { Box, Typography, Slider, Card, CardContent } from '@mui/material';
+import { Card, CardContent } from '@mui/material';
 
-const RadarChartComponent = () => {
-  const [scaledStats, setScaledStats] = useState({});
-  const [minutes, setMinutes] = useState(30);
-  const [usage, setUsage] = useState(20);
-
-  const fetchScaledStats = async () => {
-    try {
-      const response = await axios.get(`http://localhost:3001/scale-stats?mp=${minutes}&usg=${usage}`);
-      setScaledStats(response.data);
-    } catch (error) {
-      console.error('Error fetching scaled stats:', error);
-    }
-  };
+const RadarChartComponent = ({ minutes, usage, selectedRows }) => {
+  const [scaledStats, setScaledStats] = useState(null);
 
   useEffect(() => {
-    fetchScaledStats();
-  }, [minutes, usage]);
+    const fetchScaledStats = async () => {
+      try {
+        const response = await fetch('http://localhost:3001/scale-stats', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            minutes,
+            usage,
+            selectedRows,
+            init: scaledStats == null
+          })
+        });
 
-  const categories = ['PTS', 'TRB', 'AST', 'STL', 'BLK', 'TOV'];
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setScaledStats(data.scaledStats || data.normalizedRows);
+      } catch (error) {
+        console.error('Error fetching scaled stats:', error);
+      }
+    };
+
+    if (selectedRows.length > 0) {
+      fetchScaledStats();
+    }
+  }, [minutes, usage, selectedRows]);
+
+  const categories = ['PTS', 'TRB', 'trueShooting', 'assistToTurnover', 'stocks'];
 
   const data = categories.map(category => ({
     category,
-    value: scaledStats[category] || 0,
+    value: scaledStats && (scaledStats[category] || 0),
   }));
 
   return (
     <Card>
       <CardContent>
-        <Box>
-          <Typography>Minutes Played</Typography>
-          <Slider
-            value={minutes}
-            onChange={(e, newValue) => setMinutes(newValue)}
-            aria-labelledby="continuous-slider"
-            valueLabelDisplay="auto"
-            step={1}
-            min={0}
-            max={48}
-          />
-          <Typography>Usage Rate</Typography>
-          <Slider
-            value={usage}
-            onChange={(e, newValue) => setUsage(newValue)}
-            aria-labelledby="continuous-slider"
-            valueLabelDisplay="auto"
-            step={1}
-            min={0}
-            max={100}
-          />
-        </Box>
         <ResponsiveContainer width="100%" height={400}>
           <RadarChart data={data}>
             <PolarGrid />

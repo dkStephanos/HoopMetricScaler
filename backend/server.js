@@ -19,16 +19,6 @@ app.get('/player/:name', async (req, res) => {
     }
 });
 
-app.get('/players', async (req, res) => {
-    const { season, teamID } = req.query;
-    try {
-        const players = await getPlayersForSeasonAndTeam(season, teamID);
-        res.json(players);
-    } catch (error) {
-        res.status(500).send('Error fetching players');
-    }
-});
-
 app.get('/player-stats/:id', async (req, res) => {
     const { id } = req.params;
     const { season } = req.query;
@@ -37,6 +27,18 @@ app.get('/player-stats/:id', async (req, res) => {
         res.json(playerStats);
     } catch (error) {
         res.status(500).send('Error fetching player stats');
+    }
+});
+
+app.get('/team-player-dashboard/:teamId', async (req, res) => {
+    const { teamId } = req.params;
+    const { season } = req.query;
+    try {
+      const teamPlayerDashboard = await nba.stats.teamPlayerDashboard({ TeamID: teamId, Season: season });
+      res.json(teamPlayerDashboard);
+    } catch (error) {
+      console.error('Error fetching team player dashboard:', error);
+      res.status(500).send('Error fetching team player dashboard');
     }
 });
 

@@ -9,8 +9,8 @@ import {
   CircularProgress,
   Tab,
   Tabs,
-  Typography ,
-  Slider
+  Typography,
+  Slider,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import RadarChart from "./RadarChart"; // Make sure to import RadarChart
@@ -63,7 +63,6 @@ function PlayerModal({ player, playerStats, onClose }) {
       setShowContent(true);
     }
   }, [playerStats]);
-  
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
@@ -74,141 +73,140 @@ function PlayerModal({ player, playerStats, onClose }) {
   };
 
   return (
-<Dialog open={Boolean(player)} onClose={onClose} maxWidth="lg" fullWidth>
-  <DialogTitle
-    style={{
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-    }}
-  >
-    <div style={{ flex: 1, padding: "10px" }}>
-      <h4>{player.playerName}</h4>
-      <p>
-        Position: {player.position}, Height: {player.height}, Age:{" "}
-        {player.age}
-      </p>
-    </div>
-    <div style={{ flex: 2, padding: "10px" }}>
-      <h4>Overall Season Stats</h4>
-      <p>
-        {topLevelStats
-          .map((stat) => ` ${stat.label}: ${stat.value}`)
-          .toString()}
-      </p>
-    </div>
-    <img
-      src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${player.playerId}.png`}
-      onError={(e) => {
-        e.target.onerror = null;
-        e.target.src = `${process.env.PUBLIC_URL}/KevinHartHeadshot.webp`;
-      }}
-      alt={`${player.playerName}'s headshot`}
-      style={{ width: "150px", height: "auto", float: "right" }}
-    />
-  </DialogTitle>
-  <DialogContent>
-    <Tabs
-      value={tabValue}
-      onChange={handleTabChange}
-      aria-label="season stats tabs"
-    >
-      {playerStats?.seasonTotalsRegularSeason?.length > 0 && (
-        <Tab label="Regular Season" />
-      )}
-      {playerStats?.seasonTotalsPostSeason?.length > 0 && (
-        <Tab label="Post Season" />
-      )}
-    </Tabs>
-    {playerStats ? (
-      tabValue === 0 ? (
-        <DataGrid
-          rows={addIdToRows(playerStats.seasonTotalsRegularSeason)}
-          columns={columns}
-          autoHeight
-          hideFooter
-          checkboxSelection
-          onSelectionModelChange={(ids) => {
-            const selectedIDs = new Set(ids);
-            const selectedRowData =
-              playerStats.seasonTotalsRegularSeason.filter((row) =>
-                selectedIDs.has(row.id)
-              );
-            setSelectedRows(selectedRowData);
-          }}
-        />
-      ) : (
-        tabValue === 1 && (
-          <DataGrid
-            rows={addIdToRows(playerStats.seasonTotalsPostSeason)}
-            columns={columns}
-            autoHeight
-            hideFooter
-            checkboxSelection
-            onSelectionModelChange={(ids) => {
-              const selectedIDs = new Set(ids);
-              const selectedRowData =
-                playerStats.seasonTotalsPostSeason.filter((row) =>
-                  selectedIDs.has(row.id)
-                );
-              setSelectedRows(selectedRowData);
-            }}
-          />
-        )
-      )
-    ) : (
-      <div
+    <Dialog open={Boolean(player)} onClose={onClose} maxWidth="lg" fullWidth>
+      <DialogTitle
         style={{
           display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
+          justifyContent: "space-between",
           alignItems: "center",
-          height: 400,
         }}
       >
-        <Typography>Loading player stats...</Typography>
-        <CircularProgress />
-      </div>
-    )}
-    <Fade in={showContent}>
-      <div style={{ marginTop: 20 }}>
-        <Typography gutterBottom>Minutes Played</Typography>
-        <Slider
-          value={sliderValues.minutes}
-          onChange={(e, newValue) =>
-            handleSliderChange(e, newValue, "minutes")
-          }
-          aria-labelledby="continuous-slider"
-          valueLabelDisplay="auto"
-          step={1}
-          min={0}
-          max={48}
+        <div style={{ flex: 1, padding: "10px" }}>
+          <h4>{player.playerName}</h4>
+          <p>
+            Position: {player.position}, Height: {player.height}, Age:{" "}
+            {player.age}
+          </p>
+        </div>
+        <div style={{ flex: 2, padding: "10px" }}>
+          <h4>Overall Season Stats</h4>
+          <p>
+            {topLevelStats
+              .map((stat) => ` ${stat.label}: ${stat.value}`)
+              .toString()}
+          </p>
+        </div>
+        <img
+          src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${player.playerId}.png`}
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = `${process.env.PUBLIC_URL}/KevinHartHeadshot.webp`;
+          }}
+          alt={`${player.playerName}'s headshot`}
+          style={{ width: "150px", height: "auto", float: "right" }}
         />
-        <Typography gutterBottom>Usage Rate</Typography>
-        <Slider
-          value={sliderValues.usage}
-          onChange={(e, newValue) =>
-            handleSliderChange(e, newValue, "usage")
-          }
-          aria-labelledby="continuous-slider"
-          valueLabelDisplay="auto"
-          step={1}
-          min={0}
-          max={100}
-        />
-        <RadarChart
-          minutes={sliderValues.minutes}
-          usage={sliderValues.usage}
-          selectedRows={selectedRows}
-        />
-      </div>
-    </Fade>
-  </DialogContent>
-  <DialogActions>
-    <Button onClick={onClose}>Close</Button>
-  </DialogActions>
-</Dialog>
-
+      </DialogTitle>
+      <DialogContent>
+        <Tabs
+          value={tabValue}
+          onChange={handleTabChange}
+          aria-label="season stats tabs"
+        >
+          {playerStats?.seasonTotalsRegularSeason?.length > 0 && (
+            <Tab label="Regular Season" />
+          )}
+          {playerStats?.seasonTotalsPostSeason?.length > 0 && (
+            <Tab label="Post Season" />
+          )}
+        </Tabs>
+        {playerStats ? (
+          tabValue === 0 ? (
+            <DataGrid
+              rows={addIdToRows(playerStats.seasonTotalsRegularSeason)}
+              columns={columns}
+              autoHeight
+              hideFooter
+              checkboxSelection
+              onSelectionModelChange={(ids) => {
+                const selectedIDs = new Set(ids);
+                const selectedRowData =
+                  playerStats.seasonTotalsRegularSeason.filter((row) =>
+                    selectedIDs.has(row.id)
+                  );
+                setSelectedRows(selectedRowData);
+              }}
+            />
+          ) : (
+            tabValue === 1 && (
+              <DataGrid
+                rows={addIdToRows(playerStats.seasonTotalsPostSeason)}
+                columns={columns}
+                autoHeight
+                hideFooter
+                checkboxSelection
+                onSelectionModelChange={(ids) => {
+                  const selectedIDs = new Set(ids);
+                  const selectedRowData =
+                    playerStats.seasonTotalsPostSeason.filter((row) =>
+                      selectedIDs.has(row.id)
+                    );
+                  setSelectedRows(selectedRowData);
+                }}
+              />
+            )
+          )
+        ) : (
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              height: 400,
+            }}
+          >
+            <Typography>Loading player stats...</Typography>
+            <CircularProgress />
+          </div>
+        )}
+        <Fade in={showContent}>
+          <div style={{ marginTop: 20 }}>
+            <Typography gutterBottom>Minutes Played</Typography>
+            <Slider
+              value={sliderValues.minutes}
+              onChange={(e, newValue) =>
+                handleSliderChange(e, newValue, "minutes")
+              }
+              aria-labelledby="continuous-slider"
+              valueLabelDisplay="auto"
+              step={1}
+              min={0}
+              max={48}
+            />
+            <Typography gutterBottom>Usage Rate</Typography>
+            <Slider
+              value={sliderValues.usage}
+              onChange={(e, newValue) =>
+                handleSliderChange(e, newValue, "usage")
+              }
+              aria-labelledby="continuous-slider"
+              valueLabelDisplay="auto"
+              step={1}
+              min={0}
+              max={100}
+            />
+            <RadarChart
+              minutes={sliderValues.minutes}
+              usage={sliderValues.usage}
+              selectedRows={selectedRows}
+            />
+          </div>
+        </Fade>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>Close</Button>
+      </DialogActions>
+    </Dialog>
   );
 }
 

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -11,6 +11,7 @@ import {
   Tabs,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
+import RadarChart from "./RadarChart"; // Make sure to import RadarChart
 
 function PlayerModal({ player, playerStats, onClose }) {
   const columns = [
@@ -53,7 +54,7 @@ function PlayerModal({ player, playerStats, onClose }) {
     { label: "STL", value: player.stl },
   ];
 
-  const [tabValue, setTabValue] = React.useState(0);
+  const [tabValue, setTabValue] = useState(0);
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
@@ -85,6 +86,7 @@ function PlayerModal({ player, playerStats, onClose }) {
         </div>
         <img
           src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${player.playerId}.png`}
+          onError={(e) => { e.target.onerror = null; e.target.src = `${process.env.PUBLIC_URL}/KevinHartHeadshot.webp`; }}
           alt={`${player.playerName}'s headshot`}
           style={{ width: "150px", height: "auto", float: "right" }}
         />
@@ -126,7 +128,7 @@ function PlayerModal({ player, playerStats, onClose }) {
             )
           )
         ) : (
-          <DialogContent
+          <div
             style={{
               display: "flex",
               justifyContent: "center",
@@ -135,7 +137,7 @@ function PlayerModal({ player, playerStats, onClose }) {
             }}
           >
             <CircularProgress />
-          </DialogContent>
+          </div>
         )}
       </DialogContent>
       <DialogActions>

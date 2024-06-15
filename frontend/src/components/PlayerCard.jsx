@@ -8,6 +8,7 @@ function PlayerCard({ player, onClick }) {
         <CardMedia
           component="img"
           image={`https://cdn.nba.com/headshots/nba/latest/1040x760/${player.playerId}.png`}
+          onError={(e) => { e.target.onerror = null; e.target.src = `${process.env.PUBLIC_URL}/KevinHartHeadshot.webp`; }}
           alt={`${player.playerName}'s headshot`}
           style={{ objectFit: 'contain', height: '100%', width: '100%' }}
         />

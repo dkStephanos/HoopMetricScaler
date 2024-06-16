@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Grid, Fade } from "@mui/material";
 import PlayerModal from "./PlayerModal";
 import PlayerCard from "./PlayerCard";
 import { useIntersectionObserver } from "../hooks";
-import { useTheme } from '@mui/material/styles';
 
 function PlayerList({
   players,
@@ -13,16 +12,6 @@ function PlayerList({
   handleCloseModal,
 }) {
   const { isVisible, containerRef } = useIntersectionObserver(0.1);
-  const [isModalOpen, setIsModalOpen] = useState(false); // Track modal open state
-  const theme = useTheme();
-
-  useEffect(() => {
-    if (selectedPlayer) {
-      setIsModalOpen(true);
-    } else {
-      setIsModalOpen(false);
-    }
-  }, [selectedPlayer]);
 
   return (
     <>
@@ -43,7 +32,6 @@ function PlayerList({
           player={selectedPlayer}
           playerStats={playerStats}
           onClose={handleCloseModal}
-          isModalOpen={isModalOpen}
         />
       )}
     </>

@@ -89,9 +89,11 @@ Once the application is up and running, you can explore various features:
 
 Here are some examples of the app in action:
 
+Select the season and team to view statistics for all games played in that season, as well as browse any player that spent time on that roster. Historic data is available all the way back to the 1996-97 season!
 **Figure 1**: Team Browsing
 ![image](https://github.com/dkStephanos/HoopMetricScaler/blob/main/frontend/public/App.png)
 
+Narrow in on a specific player to examine their overall season stats, as well as their entire regular season and playoff career! Rows selected on the left inform the radar chart on the right, which normalizes player stats across key categories to create a top level visualization of player ability. Adjust the minutes & usage sliders to drive the AI and predict how their impact would change!
 **Figure 2**: Player Dashboarding
 ![image](https://github.com/dkStephanos/HoopMetricScaler/blob/main/frontend/public/playerDash.png)
 

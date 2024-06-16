@@ -8,7 +8,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { Card, CardContent, Slider, Typography, Grow } from "@mui/material";
+import { Card, CardContent, Slider, Typography, Grow, styled, useTheme } from "@mui/material";
 import { useIntersectionObserver } from "../hooks";
 import { fetchScaledStats } from "../actions";
 
@@ -21,11 +21,11 @@ const CATEGORIES = [
 ];
 
 const RadarChartComponent = ({ selectedRows, isModalOpen }) => {
-  const { isVisible, containerRef, resetVisibility } =
-    useIntersectionObserver(0.1);
+  const { isVisible, containerRef, resetVisibility } = useIntersectionObserver(0.1);
   const [scaledStats, setScaledStats] = useState(null);
   const [minutes, setMinutes] = useState(null);
   const [usage, setUsage] = useState(null);
+  const theme = useTheme();
 
   const fetchData = async (init = false) => {
     if (selectedRows.length) {
@@ -47,7 +47,6 @@ const RadarChartComponent = ({ selectedRows, isModalOpen }) => {
   };
 
   useEffect(() => {
-    console.log(selectedRows)
     fetchData(true);
   }, [selectedRows]);
 
@@ -59,21 +58,14 @@ const RadarChartComponent = ({ selectedRows, isModalOpen }) => {
 
   return (
     <Grow in={!!scaledStats} timeout={1000}>
-      <div style={{ marginTop: 20 }}>
+      <div style={theme.custom.radarChartContainer}>
         <Card>
           <CardContent>
             <h5>
-              Select rows from the tables above to update the chart. The sliders
-              below will augment expected value based on historic trends.
+              Select rows from the tables above to update the chart. The sliders below will augment expected value based on historic trends.
             </h5>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <div style={{ width: "45%" }}>
+            <div style={theme.custom.sliderContainer}>
+              <div style={theme.custom.sliderItem}>
                 <Typography gutterBottom>Minutes Played</Typography>
                 <Slider
                   value={minutes}
@@ -89,7 +81,7 @@ const RadarChartComponent = ({ selectedRows, isModalOpen }) => {
                   valueLabelDisplay="auto"
                 />
               </div>
-              <div style={{ width: "45%" }}>
+              <div style={theme.custom.sliderItem}>
                 <Typography gutterBottom>Usage Rate</Typography>
                 <Slider
                   value={usage}

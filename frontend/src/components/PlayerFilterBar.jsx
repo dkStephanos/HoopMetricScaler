@@ -9,10 +9,13 @@ import {
   Grid
 } from "@mui/material";
 import { TEAMS, SEASONS } from "../constants";
+import { useTheme } from '@mui/material/styles';
 
 const PlayerFilterBar = ({ season, teamID, handleSeasonChange, handleTeamChange }) => {
+  const theme = useTheme();
+  
   return (
-    <Box sx={{ my: 4 }}>
+    <Box sx={theme.custom.appBarPadding}>
       <AppBar position="static">
         <Toolbar>
           <Typography variant="h4" component="div" sx={{ flexGrow: 1 }}>
@@ -20,7 +23,7 @@ const PlayerFilterBar = ({ season, teamID, handleSeasonChange, handleTeamChange 
           </Typography>
         </Toolbar>
       </AppBar>
-      <p style={{paddingLeft: '12px'}}>Browse historic/teams & players and estimate how their stats scale with more opportunity</p>
+      <p style={theme.custom.paddingLeft}>Browse historic/teams & players and estimate how their stats scale with more opportunity</p>
       <Grid container spacing={2}>
         <Grid item xs={6}>
           <Select

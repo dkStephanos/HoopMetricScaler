@@ -12,9 +12,25 @@ import {
   TableRow,
   Paper,
   Grow,
+  styled,
+  useTheme,
 } from "@mui/material";
 
+const BlinkingTypography = styled(Typography)(({ theme }) => ({
+  animation: `${theme.transitions.create('opacity', {
+    duration: 1000,
+    easing: theme.transitions.easing.easeInOut,
+  })} infinite step-start`,
+}));
+
+const StyledTypography = styled(Typography)(({ theme }) => ({
+  paddingLeft: theme.typography.h5.paddingLeft,
+  marginTop: theme.typography.h5.marginTop,
+}));
+
 function TeamSummaryCard({ teamSummary }) {
+  const theme = useTheme();
+
   return (
     <Card sx={{ mb: 4 }}>
       <CardContent>
@@ -23,8 +39,10 @@ function TeamSummaryCard({ teamSummary }) {
             <div>
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
-                  <Typography variant="h5">{teamSummary.teamName} - <i>{teamSummary.groupValue}</i></Typography>
-                  <div style={{ paddingLeft: "12px", marginTop: "4px" }}>
+                  <Typography variant="h5">
+                    {teamSummary.teamName} - <i>{teamSummary.groupValue}</i>
+                  </Typography>
+                  <div style={theme.custom.paddingLeft}>
                     <Typography variant="body1">
                       Games Played: <i>{teamSummary.gp}</i>
                     </Typography>
@@ -47,7 +65,7 @@ function TeamSummaryCard({ teamSummary }) {
                   />
                 </Grid>
               </Grid>
-              <TableContainer component={Paper} >
+              <TableContainer component={Paper}>
                 <Table>
                   <TableBody>
                     <TableRow>

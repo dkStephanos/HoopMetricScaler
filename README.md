@@ -89,9 +89,11 @@ Once the application is up and running, you can explore various features:
 
 Here are some examples of the app in action:
 
-**Figure 1**: Player Dashboard
+**Figure 1**: Team Browsing
+![image](https://github.com/dkStephanos/HoopMetricScaler/blob/main/frontend/public/App.png)
 
-**Figure 2**: Metric Scaling
+**Figure 2**: Player Dashboarding
+![image](https://github.com/dkStephanos/HoopMetricScaler/blob/main/frontend/public/playerDash.png)
 
 ## Machine Learning Approach
 

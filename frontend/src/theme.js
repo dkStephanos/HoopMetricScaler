@@ -1,4 +1,3 @@
-// src/theme.js
 import { createTheme } from '@mui/material/styles';
 
 const theme = createTheme({
@@ -13,6 +12,20 @@ const theme = createTheme({
             '0%': { opacity: 1 },
             '50%': { opacity: 0 },
             '100%': { opacity: 1 },
+          },
+          '*::-webkit-scrollbar': {
+            width: '8px',
+          },
+          '*::-webkit-scrollbar-track': {
+            background: '#333',
+          },
+          '*::-webkit-scrollbar-thumb': {
+            backgroundColor: '#888',
+            borderRadius: '10px',
+            border: '2px solid #333',
+          },
+          '*::-webkit-scrollbar-thumb:hover': {
+            backgroundColor: '#555',
           },
         },
       },
@@ -29,9 +42,6 @@ const theme = createTheme({
     },
   },
   custom: {
-    radarChartContainer: {
-      marginTop: 20,
-    },
     sliderContainer: {
       display: 'flex',
       justifyContent: 'space-between',

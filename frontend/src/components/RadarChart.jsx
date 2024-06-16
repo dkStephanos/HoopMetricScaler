@@ -61,7 +61,6 @@ const RadarChartComponent = ({ selectedRows }) => {
 
   return (
     <Grow in={!!scaledStats} timeout={1000}>
-      <div style={theme.custom.radarChartContainer}>
         <Card>
           <CardContent>
             <h5>
@@ -128,7 +127,6 @@ const RadarChartComponent = ({ selectedRows }) => {
               )}
           </CardContent>
         </Card>
-      </div>
     </Grow>
   );
 };

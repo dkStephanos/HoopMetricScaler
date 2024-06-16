@@ -15,40 +15,35 @@ import {
 import { DataGrid } from "@mui/x-data-grid";
 import RadarChart from "./RadarChart";
 
-const centeredColumn = {
-  headerAlign: 'center',
-  align: 'center',
-};
-
 const COLUMNS = [
-  { field: "seasonId", headerName: "Season", flex: 1, minWidth: 80 },
-  { field: "teamAbbreviation", headerName: "Team", flex: 1, minWidth: 60 },
-  { field: "gp", headerName: "GP", flex: 1, minWidth: 40, ...centeredColumn },
-  { field: "min", headerName: "MIN", flex: 1, minWidth: 50, ...centeredColumn },
-  { field: "pts", headerName: "PTS", flex: 1, minWidth: 50, ...centeredColumn },
-  { field: "reb", headerName: "REB", flex: 1, minWidth: 50, ...centeredColumn },
-  { field: "ast", headerName: "AST", flex: 1, minWidth: 50, ...centeredColumn },
-  { field: "stl", headerName: "STL", flex: 1, minWidth: 50, ...centeredColumn },
-  { field: "blk", headerName: "BLK", flex: 1, minWidth: 50, ...centeredColumn },
-  { field: "fgPct", headerName: "FG%", flex: 1, minWidth: 60, ...centeredColumn },
-  { field: "fg3Pct", headerName: "3P%", flex: 1, minWidth: 60, ...centeredColumn },
-  { field: "ftPct", headerName: "FT%", flex: 1, minWidth: 60, ...centeredColumn },
-  { field: "tov", headerName: "TOV", flex: 1, minWidth: 50, ...centeredColumn },
-  { field: "pf", headerName: "PF", flex: 1, minWidth: 50, ...centeredColumn },
-  { field: "fgm", headerName: "FGM", flex: 1, minWidth: 50, ...centeredColumn },
-  { field: "fga", headerName: "FGA", flex: 1, minWidth: 50, ...centeredColumn },
-  { field: "fG3M", headerName: "3PM", flex: 1, minWidth: 50, ...centeredColumn },
-  { field: "fG3A", headerName: "3PA", flex: 1, minWidth: 50, ...centeredColumn },
-  { field: "ftm", headerName: "FTM", flex: 1, minWidth: 50, ...centeredColumn },
-  { field: "fta", headerName: "FTA", flex: 1, minWidth: 50, ...centeredColumn },
-  { field: "oreb", headerName: "OREB", flex: 1, minWidth: 60, ...centeredColumn },
-  { field: "dreb", headerName: "DREB", flex: 1, minWidth: 60, ...centeredColumn },
-  { field: "gs", headerName: "GS", flex: 1, minWidth: 40, ...centeredColumn },
+  { field: "seasonId", headerName: "Season", flex: 1, minWidth: 100 },
+  { field: "teamAbbreviation", headerName: "Team", flex: 1, minWidth: 100 },
+  { field: "gp", headerName: "GP", flex: 1, minWidth: 50 },
+  { field: "gs", headerName: "GS", flex: 1, minWidth: 50 },
+  { field: "min", headerName: "MIN", flex: 1, minWidth: 50 },
+  { field: "pts", headerName: "PTS", flex: 1, minWidth: 50 },
+  { field: "fgm", headerName: "FGM", flex: 1, minWidth: 50 },
+  { field: "fga", headerName: "FGA", flex: 1, minWidth: 50 },
+  { field: "fgPct", headerName: "FG%", flex: 1, minWidth: 60 },
+  { field: "fG3M", headerName: "3PM", flex: 1, minWidth: 50 },
+  { field: "fG3A", headerName: "3PA", flex: 1, minWidth: 50 },
+  { field: "fg3Pct", headerName: "3P%", flex: 1, minWidth: 60 },
+  { field: "ftm", headerName: "FTM", flex: 1, minWidth: 50 },
+  { field: "fta", headerName: "FTA", flex: 1, minWidth: 50 },
+  { field: "ftPct", headerName: "FT%", flex: 1, minWidth: 60 },
+  { field: "oreb", headerName: "OREB", flex: 1, minWidth: 60 },
+  { field: "dreb", headerName: "DREB", flex: 1, minWidth: 50 },
+  { field: "reb", headerName: "REB", flex: 1, minWidth: 50 },
+  { field: "ast", headerName: "AST", flex: 1, minWidth: 50 },
+  { field: "stl", headerName: "STL", flex: 1, minWidth: 50 },
+  { field: "blk", headerName: "BLK", flex: 1, minWidth: 50 },
+  { field: "tov", headerName: "TOV", flex: 1, minWidth: 50 },
+  { field: "pf", headerName: "PF", flex: 1, minWidth: 50 },
 ];
 
-function PlayerModal({ player, playerStats, onClose }) {
+function PlayerModal({ player, playerStats, onClose, isModalOpen }) {
   const [tabValue, setTabValue] = useState(0);
-  const [selectedRows, setSelectedRows] = useState(null);
+  const [selectedRows, setSelectedRows] = useState([]);
   const [selectedRowIds, setSelectedIds] = useState(null);
   const [regularSeasonRows, setRegularSeasonRows] = useState([]);
   const [postSeasonRows, setPostSeasonRows] = useState([]);
@@ -109,13 +104,13 @@ function PlayerModal({ player, playerStats, onClose }) {
       type === "regular"
         ? regularSeasonRows.filter((row) => rowIndexSet.has(row.id))
         : postSeasonRows.filter((row) => rowIndexSet.has(row.id));
-    
+
     setSelectedRows((prev) => {
       const otherType = type === "regular" ? "playoff" : "regular";
       const otherSelectedRows = prev.filter((row) => row.type === otherType);
       return [...otherSelectedRows, ...selectedRowData];
     });
-    
+
     setSelectedIds((prev) => {
       const otherTypeIds = prev.filter((id) => !id.includes(type));
       return [...otherTypeIds, ...Array.from(rowIndexSet)];
@@ -123,7 +118,7 @@ function PlayerModal({ player, playerStats, onClose }) {
   };
 
   return (
-    <Dialog open={Boolean(player)} onClose={onClose} maxWidth="lg" fullWidth>
+    <Dialog open={Boolean(player)} onClose={onClose} maxWidth="xlg" fullWidth>
       <DialogTitle>
         <Paper
           style={{
@@ -165,82 +160,109 @@ function PlayerModal({ player, playerStats, onClose }) {
           />
         </Paper>
       </DialogTitle>
-      <DialogContent>
-        <Tabs
-          value={tabValue}
-          onChange={handleTabChange}
-          aria-label="season stats tabs"
+      {selectedRowIds == null && (
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            height: 400,
+          }}
         >
-          {regularSeasonRows?.length > 0 && <Tab label="Regular Season" />}
-          {postSeasonRows?.length > 0 && <Tab label="Post Season" />}
-        </Tabs>
-        {selectedRowIds == null && (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              alignItems: "center",
-              height: 400,
-            }}
-          >
-            <Typography>Loading player stats...</Typography>
-            <CircularProgress />
-          </div>
-        )}
-<Grow in={!!selectedRowIds} timeout={1000}>
-  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-    <div style={{ width: '50%', marginRight: '10px' }}>
-      {!!selectedRowIds &&
-        (tabValue === 0 ? (
-          <DataGrid
-            rows={regularSeasonRows}
-            columns={COLUMNS}
-            autoHeight
-            hideFooter
-            checkboxSelection
-            rowSelectionModel={selectedRowIds.filter((id) =>
-              id.includes("regular")
-            )}
-            onRowSelectionModelChange={(ids) =>
-              handleSelectionChange(ids, "regular")
-            }
-            initialState={{
-              sorting: {
-                sortModel: [{ field: "seasonId", sort: "desc" }],
-              },
-            }}
-          />
-        ) : (
-          tabValue === 1 && (
-            <DataGrid
-              rows={postSeasonRows}
-              columns={COLUMNS}
-              autoHeight
-              hideFooter
-              checkboxSelection
-              rowSelectionModel={selectedRowIds.filter((id) =>
-                id.includes("playoff")
-              )}
-              onRowSelectionModelChange={(ids) =>
-                handleSelectionChange(ids, "playoff")
-              }
-              initialState={{
-                sorting: {
-                  sortModel: [{ field: "seasonId", sort: "desc" }],
-                },
-              }}
-            />
-          )
-        ))}
-    </div>
-    <div style={{ width: '50%' }}>
-      <RadarChart selectedRows={selectedRows} />
-    </div>
-  </div>
-</Grow>
-
+          <Typography>Loading player stats...</Typography>
+          <CircularProgress />
+        </div>
+      )}
+      <DialogContent style={{ display: "flex", height: "100%", padding: 0 }}>
+        <div
+          style={{
+            marginLeft: "30px",
+            width: "50%",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100%",
+            overflowY: "auto",
+          }}
+        >
+          <Grow in={!!selectedRowIds} timeout={1000}>
+            <div style={{ width: "100%", height: "100%" }}>
+              <Tabs
+                value={tabValue}
+                onChange={handleTabChange}
+                aria-label="season stats tabs"
+                variant="fullWidth"
+                sx={{
+                  width: "100%",
+                  backgroundColor: "background.paper",
+                }}
+              >
+                {regularSeasonRows?.length > 0 && (
+                  <Tab label="Regular Season" />
+                )}
+                {postSeasonRows?.length > 0 && <Tab label="Post Season" />}
+              </Tabs>
+              {!!selectedRowIds &&
+                (tabValue === 0 ? (
+                  <DataGrid
+                    rows={regularSeasonRows}
+                    columns={COLUMNS}
+                    autoHeight={false}
+                    hideFooter
+                    checkboxSelection
+                    rowSelectionModel={selectedRowIds.filter((id) =>
+                      id.includes("regular")
+                    )}
+                    onRowSelectionModelChange={(ids) =>
+                      handleSelectionChange(ids, "regular")
+                    }
+                    initialState={{
+                      sorting: {
+                        sortModel: [{ field: "seasonId", sort: "desc" }],
+                      },
+                    }}
+                    sx={{ flex: 1 }}
+                  />
+                ) : (
+                  tabValue === 1 && (
+                    <DataGrid
+                      rows={postSeasonRows}
+                      columns={COLUMNS}
+                      autoHeight={false}
+                      hideFooter
+                      checkboxSelection
+                      rowSelectionModel={selectedRowIds.filter((id) =>
+                        id.includes("playoff")
+                      )}
+                      onRowSelectionModelChange={(ids) =>
+                        handleSelectionChange(ids, "playoff")
+                      }
+                      initialState={{
+                        sorting: {
+                          sortModel: [{ field: "seasonId", sort: "desc" }],
+                        },
+                      }}
+                      sx={{ flex: 1 }}
+                    />
+                  )
+                ))}
+            </div>
+          </Grow>
+        </div>
+        <div
+          style={{
+            width: "50%",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <RadarChart selectedRows={selectedRows} isModalOpen={isModalOpen} />
+        </div>
       </DialogContent>
+
       <DialogActions>
         <Button onClick={onClose}>Close</Button>
       </DialogActions>

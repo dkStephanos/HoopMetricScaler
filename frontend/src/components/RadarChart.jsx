@@ -60,7 +60,7 @@ const RadarChartComponent = ({ selectedRows }) => {
   }, [selectedRows]);
 
   return (
-    <Grow in={!!scaledStats} timeout={1000}>
+    <Grow in={selectedRows} timeout={1000}>
         <Card>
           <CardContent>
             <h5>

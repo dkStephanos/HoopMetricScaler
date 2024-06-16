@@ -18,8 +18,9 @@ const PlayerFilterBar = ({ season, teamID, handleSeasonChange, handleTeamChange 
     <Box sx={theme.custom.appBarPadding}>
       <AppBar position="static">
         <Toolbar>
+        <img src={`${process.env.PUBLIC_URL}/icon.png`} alt="HoopMetricScaler Icon" style={{ marginRight: 10, height: 32, width: 32 }} />
           <Typography variant="h4" component="div" sx={{ flexGrow: 1 }}>
-          🏀📈 HoopMetricScaler
+          HoopMetricScaler
           </Typography>
         </Toolbar>
       </AppBar>

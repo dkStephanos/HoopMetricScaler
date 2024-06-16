@@ -99,18 +99,22 @@ function PlayerModal({ player, playerStats, onClose, isModalOpen }) {
   };
 
   const handleSelectionChange = (rowIndices, type) => {
-    console.log(selectedRowIds, rowIndices, type);
     const rowIndexSet = new Set(rowIndices);
     const selectedRowData =
       type === "regular"
         ? regularSeasonRows.filter((row) => rowIndexSet.has(row.id))
         : postSeasonRows.filter((row) => rowIndexSet.has(row.id));
-    console.log(selectedRowData, selectedRows);
-    setSelectedRows((prev) => [
-      ...prev.filter((row) => row.type !== type),
-      ...selectedRowData,
-    ]);
-    setSelectedIds(Array.from(rowIndexSet));
+    
+    setSelectedRows((prev) => {
+      const otherType = type === "regular" ? "playoff" : "regular";
+      const otherSelectedRows = prev.filter((row) => row.type === otherType);
+      return [...otherSelectedRows, ...selectedRowData];
+    });
+    
+    setSelectedIds((prev) => {
+      const otherTypeIds = prev.filter((id) => !id.includes(type));
+      return [...otherTypeIds, ...Array.from(rowIndexSet)];
+    });
   };
 
   return (

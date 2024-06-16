@@ -44,12 +44,12 @@ const COLUMNS = [
 function PlayerModal({ player, playerStats, onClose, isModalOpen }) {
   const [tabValue, setTabValue] = useState(0);
   const [selectedRows, setSelectedRows] = useState([]);
-  const [selectedRowIndices, setSelectedIds] = useState([]);
+  const [selectedRowIds, setSelectedIds] = useState(null);
   const [regularSeasonRows, setRegularSeasonRows] = useState([]);
   const [postSeasonRows, setPostSeasonRows] = useState([]);
 
-  const addIdToRows = (rows) =>
-    rows.map((row, index) => ({ ...row, id: `${index}-${row.type}` }));
+  const addIdToRows = (rows, type) =>
+    rows.map((row, index) => ({ ...row, id: `${index}-${type}`, type }));
 
   const topLevelStats = [
     {
@@ -72,30 +72,25 @@ function PlayerModal({ player, playerStats, onClose, isModalOpen }) {
 
   useEffect(() => {
     if (playerStats) {
-      const regularRows = addIdToRows(playerStats.seasonTotalsRegularSeason.map((row) => {return {...row, type: 'regular'}}));
-      const playoffRows = addIdToRows(playerStats.seasonTotalsPostSeason.map((row) => {return {...row, type: 'playoff'}}));
+      // Sort rows by seasonId in descending order
+      const sortedRegularRows = addIdToRows(
+        playerStats.seasonTotalsRegularSeason,
+        "regular"
+      ).sort((a, b) => b.seasonId.localeCompare(a.seasonId));
+      const sortedPlayoffRows = addIdToRows(
+        playerStats.seasonTotalsPostSeason,
+        "playoff"
+      ).sort((a, b) => b.seasonId.localeCompare(a.seasonId));
 
       const initialSelectedRows = [
-        ...(regularRows.length > 0
-          ? [
-              regularRows[
-                  regularRows.length - 1
-                ]
-            ]
-          : []),
-        ...(playoffRows.length > 0
-          ? [
-              playoffRows[
-                  playoffRows.length - 1
-                ],
-            ]
-          : []),
+        ...(sortedRegularRows.length > 0 ? [sortedRegularRows[0]] : []),
+        ...(sortedPlayoffRows.length > 0 ? [sortedPlayoffRows[0]] : []),
       ];
 
       setSelectedRows(initialSelectedRows);
       setSelectedIds(initialSelectedRows.map((row) => row.id));
-      setRegularSeasonRows(addIdToRows(playerStats.seasonTotalsRegularSeason));
-      setPostSeasonRows(addIdToRows(playerStats.seasonTotalsPostSeason))
+      setRegularSeasonRows(sortedRegularRows);
+      setPostSeasonRows(sortedPlayoffRows);
     }
   }, [playerStats]);
 
@@ -104,22 +99,13 @@ function PlayerModal({ player, playerStats, onClose, isModalOpen }) {
   };
 
   const handleSelectionChange = (rowIndices, type) => {
+    console.log(selectedRowIds, rowIndices, type);
     const rowIndexSet = new Set(rowIndices);
-    console.log(rowIndexSet);
     const selectedRowData =
       type === "regular"
-        ? playerStats.seasonTotalsRegularSeason
-            .filter((row, index) => rowIndexSet.has(`${index}-${type}`))
-            .map((row) => {
-              return { ...row, type };
-            })
-        : playerStats.seasonTotalsPostSeason
-            .filter((row, index) => rowIndexSet.has(`${index}-${type}`))
-            .map((row) => {
-              return { ...row, type };
-            });
-    console.log(selectedRowData);
-
+        ? regularSeasonRows.filter((row) => rowIndexSet.has(row.id))
+        : postSeasonRows.filter((row) => rowIndexSet.has(row.id));
+    console.log(selectedRowData, selectedRows);
     setSelectedRows((prev) => [
       ...prev.filter((row) => row.type !== type),
       ...selectedRowData,
@@ -176,14 +162,10 @@ function PlayerModal({ player, playerStats, onClose, isModalOpen }) {
           onChange={handleTabChange}
           aria-label="season stats tabs"
         >
-          {regularSeasonRows?.length > 0 && (
-            <Tab label="Regular Season" />
-          )}
-          {postSeasonRows?.length > 0 && (
-            <Tab label="Post Season" />
-          )}
+          {regularSeasonRows?.length > 0 && <Tab label="Regular Season" />}
+          {postSeasonRows?.length > 0 && <Tab label="Post Season" />}
         </Tabs>
-        {playerStats == null && (
+        {selectedRowIds == null && (
           <div
             style={{
               display: "flex",
@@ -197,9 +179,9 @@ function PlayerModal({ player, playerStats, onClose, isModalOpen }) {
             <CircularProgress />
           </div>
         )}
-        <Grow in={!!playerStats} timeout={1000}>
+        <Grow in={!!selectedRowIds} timeout={1000}>
           <div>
-            {playerStats &&
+            {!!selectedRowIds &&
               (tabValue === 0 ? (
                 <DataGrid
                   rows={regularSeasonRows}
@@ -207,10 +189,17 @@ function PlayerModal({ player, playerStats, onClose, isModalOpen }) {
                   autoHeight
                   hideFooter
                   checkboxSelection
-                  selectionModel={selectedRowIndices}
+                  rowSelectionModel={selectedRowIds.filter((id) =>
+                    id.includes("regular")
+                  )}
                   onRowSelectionModelChange={(ids) =>
                     handleSelectionChange(ids, "regular")
                   }
+                  initialState={{
+                    sorting: {
+                      sortModel: [{ field: "seasonId", sort: "desc" }],
+                    },
+                  }}
                 />
               ) : (
                 tabValue === 1 && (
@@ -220,10 +209,17 @@ function PlayerModal({ player, playerStats, onClose, isModalOpen }) {
                     autoHeight
                     hideFooter
                     checkboxSelection
-                    selectionModel={selectedRowIndices}
+                    rowSelectionModel={selectedRowIds.filter((id) =>
+                      id.includes("playoff")
+                    )}
                     onRowSelectionModelChange={(ids) =>
                       handleSelectionChange(ids, "playoff")
                     }
+                    initialState={{
+                      sorting: {
+                        sortModel: [{ field: "seasonId", sort: "desc" }],
+                      },
+                    }}
                   />
                 )
               ))}

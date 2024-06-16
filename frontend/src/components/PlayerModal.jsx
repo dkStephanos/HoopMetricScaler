@@ -5,18 +5,17 @@ import {
   DialogContent,
   DialogActions,
   Button,
-  Fade,
+  Grow,
   CircularProgress,
   Tab,
   Tabs,
   Typography,
-  Slider,
   Paper,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
-import RadarChart from "./RadarChart"; // Make sure to import RadarChart
+import RadarChart from "./RadarChart";
 
-function PlayerModal({ player, playerStats, onClose }) {
+function PlayerModal({ player, playerStats, onClose, isModalOpen }) {
   const columns = [
     { field: "seasonId", headerName: "Season", flex: 1, minWidth: 100 },
     { field: "teamAbbreviation", headerName: "Team", flex: 1, minWidth: 100 },
@@ -49,37 +48,46 @@ function PlayerModal({ player, playerStats, onClose }) {
   const topLevelStats = [
     {
       label: "PIE",
-      value: playerStats ? playerStats.playerHeadlineStats[0].pie : 'n/a',
+      value: playerStats ? playerStats.playerHeadlineStats[0].pie : "n/a",
     },
     {
       label: "PTS",
-      value: playerStats ? playerStats.playerHeadlineStats[0].pts : 'n/a',
+      value: playerStats ? playerStats.playerHeadlineStats[0].pts : "n/a",
     },
     {
       label: "REB",
-      value: playerStats ? playerStats.playerHeadlineStats[0].reb : 'n/a',
+      value: playerStats ? playerStats.playerHeadlineStats[0].reb : "n/a",
     },
     {
       label: "AST",
-      value: playerStats ? playerStats.playerHeadlineStats[0].ast : 'n/a',
+      value: playerStats ? playerStats.playerHeadlineStats[0].ast : "n/a",
     },
   ];
 
   const [tabValue, setTabValue] = useState(0);
-  const [sliderValues, setSliderValues] = useState({ minutes: 30, usage: 20 });
-  const [showContent, setShowContent] = useState(false);
+  const [sliderValues, setSliderValues] = useState({
+    minutes: null,
+    usage: null,
+  });
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
 
   useEffect(() => {
     if (playerStats) {
-      setShowContent(true);
       const initialSelectedRows = [
         ...(playerStats.seasonTotalsRegularSeason.length > 0
-          ? [playerStats.seasonTotalsRegularSeason[playerStats.seasonTotalsRegularSeason.length - 1]]
+          ? [
+              playerStats.seasonTotalsRegularSeason[
+                playerStats.seasonTotalsRegularSeason.length - 1
+              ],
+            ]
           : []),
         ...(playerStats.seasonTotalsPostSeason.length > 0
-          ? [playerStats.seasonTotalsPostSeason[playerStats.seasonTotalsPostSeason.length - 1]]
+          ? [
+              playerStats.seasonTotalsPostSeason[
+                playerStats.seasonTotalsPostSeason.length - 1
+              ],
+            ]
           : []),
       ];
       const initialSelectedIds = initialSelectedRows.map((row) => row.id);
@@ -125,11 +133,16 @@ function PlayerModal({ player, playerStats, onClose }) {
           }}
         >
           <div style={{ flex: 1, padding: "10px" }}>
-            <h3>{player.playerName}: <i>{playerStats ? playerStats.commonPlayerInfo[0].position : "-"}</i>
+            <h3>
+              {player.playerName}:{" "}
+              <i>
+                {playerStats ? playerStats.commonPlayerInfo[0].position : "-"}
+              </i>
             </h3>
             <p>
               Height:{" "}
-              {playerStats ? playerStats.commonPlayerInfo[0].height : "-"}, Weight:{" "}
+              {playerStats ? playerStats.commonPlayerInfo[0].height : "-"},
+              Weight:{" "}
               {playerStats ? playerStats.commonPlayerInfo[0].weight : "-"}
             </p>
           </div>
@@ -165,35 +178,7 @@ function PlayerModal({ player, playerStats, onClose }) {
             <Tab label="Post Season" />
           )}
         </Tabs>
-        {playerStats ? (
-          tabValue === 0 ? (
-            <DataGrid
-              rows={addIdToRows(playerStats.seasonTotalsRegularSeason)}
-              columns={columns}
-              autoHeight
-              hideFooter
-              checkboxSelection
-              selectionModel={selectedIds}
-              onSelectionModelChange={(ids) =>
-                handleSelectionChange(ids, "regular")
-              }
-            />
-          ) : (
-            tabValue === 1 && (
-              <DataGrid
-                rows={addIdToRows(playerStats.seasonTotalsPostSeason)}
-                columns={columns}
-                autoHeight
-                hideFooter
-                checkboxSelection
-                selectionModel={selectedIds}
-                onSelectionModelChange={(ids) =>
-                  handleSelectionChange(ids, "playoff")
-                }
-              />
-            )
-          )
-        ) : (
+        {playerStats == null && (
           <div
             style={{
               display: "flex",
@@ -207,39 +192,45 @@ function PlayerModal({ player, playerStats, onClose }) {
             <CircularProgress />
           </div>
         )}
-        <Fade in={showContent}>
-          <div style={{ marginTop: 20 }}>
-            <Typography gutterBottom>Minutes Played</Typography>
-            <Slider
-              value={sliderValues.minutes}
-              onChange={(e, newValue) =>
-                handleSliderChange(e, newValue, "minutes")
-              }
-              aria-labelledby="continuous-slider"
-              valueLabelDisplay="auto"
-              step={1}
-              min={0}
-              max={48}
-            />
-            <Typography gutterBottom>Usage Rate</Typography>
-            <Slider
-              value={sliderValues.usage}
-              onChange={(e, newValue) =>
-                handleSliderChange(e, newValue, "usage")
-              }
-              aria-labelledby="continuous-slider"
-              valueLabelDisplay="auto"
-              step={1}
-              min={0}
-              max={100}
-            />
-            <RadarChart
-              minutes={sliderValues.minutes}
-              usage={sliderValues.usage}
-              selectedRows={selectedRows}
-            />
+        <Grow in={!!playerStats} timeout={1000}>
+          <div>
+            {playerStats &&
+              (tabValue === 0 ? (
+                <DataGrid
+                  rows={addIdToRows(playerStats.seasonTotalsRegularSeason)}
+                  columns={columns}
+                  autoHeight
+                  hideFooter
+                  checkboxSelection
+                  selectionModel={selectedIds}
+                  onSelectionModelChange={(ids) =>
+                    handleSelectionChange(ids, "regular")
+                  }
+                />
+              ) : (
+                tabValue === 1 && (
+                  <DataGrid
+                    rows={addIdToRows(playerStats.seasonTotalsPostSeason)}
+                    columns={columns}
+                    autoHeight
+                    hideFooter
+                    checkboxSelection
+                    selectionModel={selectedIds}
+                    onSelectionModelChange={(ids) =>
+                      handleSelectionChange(ids, "playoff")
+                    }
+                  />
+                )
+              ))}
           </div>
-        </Fade>
+        </Grow>
+        <RadarChart
+          minutes={sliderValues.minutes}
+          usage={sliderValues.usage}
+          selectedRows={selectedRows}
+          handleSliderChange={handleSliderChange}
+          isModalOpen={isModalOpen}
+        />
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Close</Button>

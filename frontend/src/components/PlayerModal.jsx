@@ -44,10 +44,12 @@ const COLUMNS = [
 function PlayerModal({ player, playerStats, onClose, isModalOpen }) {
   const [tabValue, setTabValue] = useState(0);
   const [selectedRows, setSelectedRows] = useState([]);
-  const [selectedRowIndices, setSelectedIndices] = useState([]);
+  const [selectedRowIndices, setSelectedIds] = useState([]);
+  const [regularSeasonRows, setRegularSeasonRows] = useState([]);
+  const [postSeasonRows, setPostSeasonRows] = useState([]);
 
   const addIdToRows = (rows) =>
-    rows.map((row, index) => ({ ...row, id: index }));
+    rows.map((row, index) => ({ ...row, id: `${index}-${row.type}` }));
 
   const topLevelStats = [
     {
@@ -70,31 +72,30 @@ function PlayerModal({ player, playerStats, onClose, isModalOpen }) {
 
   useEffect(() => {
     if (playerStats) {
+      const regularRows = addIdToRows(playerStats.seasonTotalsRegularSeason.map((row) => {return {...row, type: 'regular'}}));
+      const playoffRows = addIdToRows(playerStats.seasonTotalsPostSeason.map((row) => {return {...row, type: 'playoff'}}));
+
       const initialSelectedRows = [
-        ...(playerStats.seasonTotalsRegularSeason.length > 0
+        ...(regularRows.length > 0
           ? [
-              {
-                ...playerStats.seasonTotalsRegularSeason[
-                  playerStats.seasonTotalsRegularSeason.length - 1
-                ],
-                type: "regular",
-              },
+              regularRows[
+                  regularRows.length - 1
+                ]
             ]
           : []),
-        ...(playerStats.seasonTotalsPostSeason.length > 0
+        ...(playoffRows.length > 0
           ? [
-              {
-                ...playerStats.seasonTotalsPostSeason[
-                  playerStats.seasonTotalsPostSeason.length - 1
+              playoffRows[
+                  playoffRows.length - 1
                 ],
-                type: "playoff",
-              },
             ]
           : []),
       ];
 
       setSelectedRows(initialSelectedRows);
-      setSelectedIndices(initialSelectedRows.map((row, index) => index));
+      setSelectedIds(initialSelectedRows.map((row) => row.id));
+      setRegularSeasonRows(addIdToRows(playerStats.seasonTotalsRegularSeason));
+      setPostSeasonRows(addIdToRows(playerStats.seasonTotalsPostSeason))
     }
   }, [playerStats]);
 
@@ -104,23 +105,26 @@ function PlayerModal({ player, playerStats, onClose, isModalOpen }) {
 
   const handleSelectionChange = (rowIndices, type) => {
     const rowIndexSet = new Set(rowIndices);
+    console.log(rowIndexSet);
     const selectedRowData =
       type === "regular"
         ? playerStats.seasonTotalsRegularSeason
-            .filter((row, index) => rowIndexSet.has(index))
+            .filter((row, index) => rowIndexSet.has(`${index}-${type}`))
             .map((row) => {
               return { ...row, type };
             })
         : playerStats.seasonTotalsPostSeason
-            .filter((row, index) => rowIndexSet.has(index))
+            .filter((row, index) => rowIndexSet.has(`${index}-${type}`))
             .map((row) => {
               return { ...row, type };
             });
+    console.log(selectedRowData);
+
     setSelectedRows((prev) => [
       ...prev.filter((row) => row.type !== type),
       ...selectedRowData,
     ]);
-    setSelectedIndices(Array.from(rowIndexSet));
+    setSelectedIds(Array.from(rowIndexSet));
   };
 
   return (
@@ -172,10 +176,10 @@ function PlayerModal({ player, playerStats, onClose, isModalOpen }) {
           onChange={handleTabChange}
           aria-label="season stats tabs"
         >
-          {playerStats?.seasonTotalsRegularSeason?.length > 0 && (
+          {regularSeasonRows?.length > 0 && (
             <Tab label="Regular Season" />
           )}
-          {playerStats?.seasonTotalsPostSeason?.length > 0 && (
+          {postSeasonRows?.length > 0 && (
             <Tab label="Post Season" />
           )}
         </Tabs>
@@ -198,7 +202,7 @@ function PlayerModal({ player, playerStats, onClose, isModalOpen }) {
             {playerStats &&
               (tabValue === 0 ? (
                 <DataGrid
-                  rows={addIdToRows(playerStats.seasonTotalsRegularSeason)}
+                  rows={regularSeasonRows}
                   columns={COLUMNS}
                   autoHeight
                   hideFooter
@@ -211,7 +215,7 @@ function PlayerModal({ player, playerStats, onClose, isModalOpen }) {
               ) : (
                 tabValue === 1 && (
                   <DataGrid
-                    rows={addIdToRows(playerStats.seasonTotalsPostSeason)}
+                    rows={postSeasonRows}
                     columns={COLUMNS}
                     autoHeight
                     hideFooter

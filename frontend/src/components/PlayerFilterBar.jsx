@@ -16,18 +16,18 @@ const PlayerFilterBar = ({ season, teamID, handleSeasonChange, handleTeamChange 
       <AppBar position="static">
         <Toolbar>
           <Typography variant="h4" component="div" sx={{ flexGrow: 1 }}>
-            NBA Players
+            HoopMetricScaler
           </Typography>
         </Toolbar>
       </AppBar>
-      <Grid container spacing={2} sx={{ mt: 2 }}>
+      <p style={{paddingLeft: '12px'}}>Browse historic/teams & players and estimate how their stats scale with more opportunity</p>
+      <Grid container spacing={2}>
         <Grid item xs={6}>
           <Select
             value={season}
             onChange={handleSeasonChange}
             displayEmpty
             fullWidth
-            sx={{ mb: 2 }}
           >
             {SEASONS.map((season) => (
               <MenuItem key={season} value={season}>
@@ -42,7 +42,6 @@ const PlayerFilterBar = ({ season, teamID, handleSeasonChange, handleTeamChange 
             onChange={handleTeamChange}
             displayEmpty
             fullWidth
-            sx={{ mb: 2 }}
           >
             {TEAMS.map((team) => (
               <MenuItem key={team.id} value={team.id}>

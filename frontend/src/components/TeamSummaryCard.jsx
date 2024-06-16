@@ -23,20 +23,21 @@ function TeamSummaryCard({ teamSummary }) {
             <div>
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
-                  <Typography variant="h5">{teamSummary.teamName}</Typography>
-                  <Typography variant="subtitle1">
-                    {teamSummary.groupValue}
-                  </Typography>
-                  <Typography variant="body2">
-                    Games Played: {teamSummary.gp}
-                  </Typography>
-                  <Typography variant="body2">Wins: {teamSummary.w}</Typography>
-                  <Typography variant="body2">
-                    Losses: {teamSummary.l}
-                  </Typography>
-                  <Typography variant="body2">
-                    Win %: {teamSummary.wPct}
-                  </Typography>
+                  <Typography variant="h5">{teamSummary.teamName} - <i>{teamSummary.groupValue}</i></Typography>
+                  <div style={{ paddingLeft: "12px", marginTop: "4px" }}>
+                    <Typography variant="body1">
+                      Games Played: <i>{teamSummary.gp}</i>
+                    </Typography>
+                    <Typography variant="body1">
+                      Wins: <i>{teamSummary.w}</i>
+                    </Typography>
+                    <Typography variant="body1">
+                      Losses: <i>{teamSummary.l}</i>
+                    </Typography>
+                    <Typography variant="body1">
+                      Win %: <i>{teamSummary.wPct}</i>
+                    </Typography>
+                  </div>
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <img
@@ -46,14 +47,16 @@ function TeamSummaryCard({ teamSummary }) {
                   />
                 </Grid>
               </Grid>
-              <TableContainer component={Paper} sx={{ mt: 2 }}>
+              <TableContainer component={Paper} >
                 <Table>
                   <TableBody>
                     <TableRow>
                       <TableCell>Points</TableCell>
                       <TableCell>{teamSummary.pts}</TableCell>
                       <TableCell>Points Allowed</TableCell>
-                      <TableCell>{teamSummary.pts - teamSummary.plusMinus}</TableCell>
+                      <TableCell>
+                        {teamSummary.pts - teamSummary.plusMinus}
+                      </TableCell>
                       <TableCell>Plus/Minus</TableCell>
                       <TableCell>{teamSummary.plusMinus}</TableCell>
                     </TableRow>

@@ -132,7 +132,16 @@ function PlayerModal({ player, playerStats, onClose }) {
             alignItems: "center",
           }}
         >
-          <div style={{ flex: 1, padding: "10px" }}>
+          <div style={{ flex: 2.5, padding: "10px" }}>
+          <img
+            src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${player.playerId}.png`}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = `${process.env.PUBLIC_URL}/KevinHartHeadshot.webp`;
+            }}
+            alt={`${player.playerName}'s headshot`}
+            style={{ width: "150px", height: "auto", float: "left" }}
+          />
             <h3>
               {player.playerName}:{" "}
               <i>
@@ -146,7 +155,7 @@ function PlayerModal({ player, playerStats, onClose }) {
               {playerStats ? playerStats.commonPlayerInfo[0].weight : "-"}
             </p>
           </div>
-          <div style={{ flex: 2, padding: "10px" }}>
+          <div style={{ flex: 2, padding: "10px", float: "right" }}>
             <h3>Overall Season Stats</h3>
             <p>
               {topLevelStats
@@ -154,15 +163,6 @@ function PlayerModal({ player, playerStats, onClose }) {
                 .toString()}
             </p>
           </div>
-          <img
-            src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${player.playerId}.png`}
-            onError={(e) => {
-              e.target.onerror = null;
-              e.target.src = `${process.env.PUBLIC_URL}/KevinHartHeadshot.webp`;
-            }}
-            alt={`${player.playerName}'s headshot`}
-            style={{ width: "150px", height: "auto", float: "right" }}
-          />
         </Paper>
       </DialogTitle>
       {selectedRowIds == null && (
@@ -179,94 +179,97 @@ function PlayerModal({ player, playerStats, onClose }) {
           <CircularProgress />
         </div>
       )}
-      <DialogContent style={{ display: "flex", height: "100%", padding: 0 }}>
-        <div
-          style={{
-            marginLeft: "30px",
-            width: "50%",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-            height: "100%",
-            overflowY: "auto",
+      <DialogContent style={{ display: "flex", height: "80vh", padding: 0 }}>
+  <div
+    style={{
+      marginLeft: "30px",
+      width: "50%",
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+      alignItems: "center",
+      height: "100%",
+    }}
+  >
+    <Grow
+      in={!!selectedRowIds}
+      timeout={{ enter: 300, exit: 200 }}
+      easing={{ enter: 'cubic-bezier(0.4, 0, 0.2, 1)', exit: 'cubic-bezier(0.4, 0, 0.6, 1)' }}
+    >
+      <div style={{ width: "100%", height: "100%" }}>
+        <Tabs
+          value={tabValue}
+          onChange={handleTabChange}
+          aria-label="season stats tabs"
+          variant="fullWidth"
+          sx={{
+            width: "100%",
+            backgroundColor: "background.paper",
           }}
         >
-          <Grow in={!!selectedRowIds} timeout={1000}>
-            <div style={{ width: "100%", height: "100%" }}>
-              <Tabs
-                value={tabValue}
-                onChange={handleTabChange}
-                aria-label="season stats tabs"
-                variant="fullWidth"
-                sx={{
-                  width: "100%",
-                  backgroundColor: "background.paper",
-                }}
-              >
-                {regularSeasonRows?.length > 0 && (
-                  <Tab label="Regular Season" />
+          {regularSeasonRows?.length > 0 && <Tab label="Regular Season" />}
+          {postSeasonRows?.length > 0 && <Tab label="Post Season" />}
+        </Tabs>
+        {!!selectedRowIds &&
+          (tabValue === 0 ? (
+            <DataGrid
+              rows={regularSeasonRows}
+              columns={COLUMNS}
+              autoHeight={false}
+              hideFooter
+              checkboxSelection
+              rowSelectionModel={selectedRowIds.filter((id) =>
+                id.includes("regular")
+              )}
+              onRowSelectionModelChange={(ids) =>
+                handleSelectionChange(ids, "regular")
+              }
+              initialState={{
+                sorting: {
+                  sortModel: [{ field: "seasonId", sort: "desc" }],
+                },
+              }}
+              sx={{ height: "calc(100% - 48px)", overflowY: "auto" }} // Adjusted height to account for the tab height
+            />
+          ) : (
+            tabValue === 1 && (
+              <DataGrid
+                rows={postSeasonRows}
+                columns={COLUMNS}
+                autoHeight={false}
+                hideFooter
+                checkboxSelection
+                rowSelectionModel={selectedRowIds.filter((id) =>
+                  id.includes("playoff")
                 )}
-                {postSeasonRows?.length > 0 && <Tab label="Post Season" />}
-              </Tabs>
-              {!!selectedRowIds &&
-                (tabValue === 0 ? (
-                  <DataGrid
-                    rows={regularSeasonRows}
-                    columns={COLUMNS}
-                    autoHeight={false}
-                    hideFooter
-                    checkboxSelection
-                    rowSelectionModel={selectedRowIds.filter((id) =>
-                      id.includes("regular")
-                    )}
-                    onRowSelectionModelChange={(ids) =>
-                      handleSelectionChange(ids, "regular")
-                    }
-                    initialState={{
-                      sorting: {
-                        sortModel: [{ field: "seasonId", sort: "desc" }],
-                      },
-                    }}
-                    sx={{ flex: 1 }}
-                  />
-                ) : (
-                  tabValue === 1 && (
-                    <DataGrid
-                      rows={postSeasonRows}
-                      columns={COLUMNS}
-                      autoHeight={false}
-                      hideFooter
-                      checkboxSelection
-                      rowSelectionModel={selectedRowIds.filter((id) =>
-                        id.includes("playoff")
-                      )}
-                      onRowSelectionModelChange={(ids) =>
-                        handleSelectionChange(ids, "playoff")
-                      }
-                      initialState={{
-                        sorting: {
-                          sortModel: [{ field: "seasonId", sort: "desc" }],
-                        },
-                      }}
-                      sx={{ flex: 1 }}
-                    />
-                  )
-                ))}
-            </div>
-          </Grow>
-        </div>
-        <div
-          style={{
-            width: "50%",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <RadarChart selectedRows={selectedRows} />
-        </div>
-      </DialogContent>
+                onRowSelectionModelChange={(ids) =>
+                  handleSelectionChange(ids, "playoff")
+                }
+                initialState={{
+                  sorting: {
+                    sortModel: [{ field: "seasonId", sort: "desc" }],
+                  },
+                }}
+                sx={{ height: "calc(100% - 48px)", overflowY: "auto" }} // Adjusted height to account for the tab height
+              />
+            )
+          ))}
+      </div>
+    </Grow>
+  </div>
+  <div
+    style={{
+      width: "50%",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      margin: "0 20px 0 20px"
+    }}
+  >
+    <RadarChart selectedRows={selectedRows} />
+  </div>
+</DialogContent>
+
 
       <DialogActions>
         <Button onClick={onClose}>Close</Button>

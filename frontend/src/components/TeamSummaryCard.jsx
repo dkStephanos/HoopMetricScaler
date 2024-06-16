@@ -12,21 +12,8 @@ import {
   TableRow,
   Paper,
   Grow,
-  styled,
   useTheme,
 } from "@mui/material";
-
-const BlinkingTypography = styled(Typography)(({ theme }) => ({
-  animation: `${theme.transitions.create('opacity', {
-    duration: 1000,
-    easing: theme.transitions.easing.easeInOut,
-  })} infinite step-start`,
-}));
-
-const StyledTypography = styled(Typography)(({ theme }) => ({
-  paddingLeft: theme.typography.h5.paddingLeft,
-  marginTop: theme.typography.h5.marginTop,
-}));
 
 function TeamSummaryCard({ teamSummary }) {
   const theme = useTheme();

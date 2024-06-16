@@ -48,19 +48,19 @@ function PlayerModal({ player, playerStats, onClose, isModalOpen }) {
   const topLevelStats = [
     {
       label: "PIE",
-      value: playerStats ? playerStats.playerHeadlineStats[0].pie : "n/a",
+      value: playerStats ? playerStats.playerHeadlineStats[0].pie : "-",
     },
     {
       label: "PTS",
-      value: playerStats ? playerStats.playerHeadlineStats[0].pts : "n/a",
+      value: playerStats ? playerStats.playerHeadlineStats[0].pts : "-",
     },
     {
       label: "REB",
-      value: playerStats ? playerStats.playerHeadlineStats[0].reb : "n/a",
+      value: playerStats ? playerStats.playerHeadlineStats[0].reb : "-",
     },
     {
       label: "AST",
-      value: playerStats ? playerStats.playerHeadlineStats[0].ast : "n/a",
+      value: playerStats ? playerStats.playerHeadlineStats[0].ast : "-",
     },
   ];
 

@@ -109,6 +109,11 @@ function trainModel(features, labels) {
 
 async function initializeModels() {
   try {
+    if (fs.existsSync('./data/models.json')) {
+      logger.info("Models already exist. Skipping model initialization.");
+      return;
+    }
+    
     logger.info("Starting model initialization");
 
     // Load box scores from CSV

@@ -20,36 +20,36 @@ const CATEGORIES = [
   { name: "stocks", label: "Defense" },
 ];
 
-const RadarChartComponent = ({
-  minutes,
-  usage,
-  selectedRows,
-  handleSliderChange,
-  isModalOpen,
-}) => {
-  const { isVisible, containerRef, resetVisibility } = useIntersectionObserver(0.1);
+const RadarChartComponent = ({ selectedRows, isModalOpen }) => {
+  const { isVisible, containerRef, resetVisibility } =
+    useIntersectionObserver(0.1);
   const [scaledStats, setScaledStats] = useState(null);
+  const [minutes, setMinutes] = useState(null);
+  const [usage, setUsage] = useState(null);
 
-  const fetchData = async () => {
+  const fetchData = async (init = false) => {
     if (selectedRows.length) {
       let data = await fetchScaledStats(
         minutes,
         usage,
         selectedRows,
-        scaledStats == null
+        init || scaledStats == null
       );
       for (const key in data) {
         if (data[key] === null) {
           data[key] = 0;
         }
       }
+      setMinutes(data.minutesPlayed);
+      setUsage(data.usage);
       setScaledStats(data);
     }
   };
 
   useEffect(() => {
-    fetchData();
-  }, [minutes, usage, selectedRows]);
+    console.log(selectedRows)
+    fetchData(true);
+  }, [selectedRows]);
 
   useEffect(() => {
     if (!isModalOpen) {
@@ -57,21 +57,13 @@ const RadarChartComponent = ({
     }
   }, [isModalOpen]);
 
-  const handleMinutesChange = (event, newValue) => {
-    handleSliderChange(event, newValue, "minutes");
-  };
-
-  const handleUsageChange = (event, newValue) => {
-    handleSliderChange(event, newValue, "usage");
-  };
-
   return (
     <Grow in={!!scaledStats} timeout={1000}>
       <div style={{ marginTop: 20 }}>
         <Card>
           <CardContent>
             <h5>
-              Select rows from the table above to update the chart. The sliders
+              Select rows from the tables above to update the chart. The sliders
               below will augment expected value based on historic trends.
             </h5>
             <div
@@ -85,7 +77,11 @@ const RadarChartComponent = ({
                 <Typography gutterBottom>Minutes Played</Typography>
                 <Slider
                   value={minutes}
-                  onChange={handleMinutesChange}
+                  disabled={minutes == null}
+                  onChange={(_, value) => {
+                    setMinutes(value);
+                    fetchData();
+                  }}
                   aria-labelledby="minutes-slider"
                   min={0}
                   max={48}
@@ -97,7 +93,11 @@ const RadarChartComponent = ({
                 <Typography gutterBottom>Usage Rate</Typography>
                 <Slider
                   value={usage}
-                  onChange={handleUsageChange}
+                  disabled={usage == null}
+                  onChange={(_, value) => {
+                    setUsage(value);
+                    fetchData();
+                  }}
                   aria-labelledby="usage-slider"
                   min={0}
                   max={1}
@@ -117,7 +117,7 @@ const RadarChartComponent = ({
                   >
                     <PolarGrid />
                     <PolarAngleAxis dataKey="category" />
-                    <PolarRadiusAxis domain={[0, 1]} />
+                    <PolarRadiusAxis angle={55} domain={[0, 1]} />
                     <Radar
                       name="Player Stats"
                       dataKey="value"

@@ -15,32 +15,36 @@ import {
 import { DataGrid } from "@mui/x-data-grid";
 import RadarChart from "./RadarChart";
 
+const COLUMNS = [
+  { field: "seasonId", headerName: "Season", flex: 1, minWidth: 100 },
+  { field: "teamAbbreviation", headerName: "Team", flex: 1, minWidth: 100 },
+  { field: "gp", headerName: "GP", flex: 1, minWidth: 50 },
+  { field: "gs", headerName: "GS", flex: 1, minWidth: 50 },
+  { field: "min", headerName: "MIN", flex: 1, minWidth: 50 },
+  { field: "pts", headerName: "PTS", flex: 1, minWidth: 50 },
+  { field: "fgm", headerName: "FGM", flex: 1, minWidth: 50 },
+  { field: "fga", headerName: "FGA", flex: 1, minWidth: 50 },
+  { field: "fgPct", headerName: "FG%", flex: 1, minWidth: 60 },
+  { field: "fG3M", headerName: "3PM", flex: 1, minWidth: 50 },
+  { field: "fG3A", headerName: "3PA", flex: 1, minWidth: 50 },
+  { field: "fg3Pct", headerName: "3P%", flex: 1, minWidth: 60 },
+  { field: "ftm", headerName: "FTM", flex: 1, minWidth: 50 },
+  { field: "fta", headerName: "FTA", flex: 1, minWidth: 50 },
+  { field: "ftPct", headerName: "FT%", flex: 1, minWidth: 60 },
+  { field: "oreb", headerName: "OREB", flex: 1, minWidth: 60 },
+  { field: "dreb", headerName: "DREB", flex: 1, minWidth: 50 },
+  { field: "reb", headerName: "REB", flex: 1, minWidth: 50 },
+  { field: "ast", headerName: "AST", flex: 1, minWidth: 50 },
+  { field: "stl", headerName: "STL", flex: 1, minWidth: 50 },
+  { field: "blk", headerName: "BLK", flex: 1, minWidth: 50 },
+  { field: "tov", headerName: "TOV", flex: 1, minWidth: 50 },
+  { field: "pf", headerName: "PF", flex: 1, minWidth: 50 },
+];
+
 function PlayerModal({ player, playerStats, onClose, isModalOpen }) {
-  const columns = [
-    { field: "seasonId", headerName: "Season", flex: 1, minWidth: 100 },
-    { field: "teamAbbreviation", headerName: "Team", flex: 1, minWidth: 100 },
-    { field: "gp", headerName: "GP", flex: 1, minWidth: 50 },
-    { field: "gs", headerName: "GS", flex: 1, minWidth: 50 },
-    { field: "min", headerName: "MIN", flex: 1, minWidth: 50 },
-    { field: "pts", headerName: "PTS", flex: 1, minWidth: 50 },
-    { field: "fgm", headerName: "FGM", flex: 1, minWidth: 50 },
-    { field: "fga", headerName: "FGA", flex: 1, minWidth: 50 },
-    { field: "fgPct", headerName: "FG%", flex: 1, minWidth: 60 },
-    { field: "fG3M", headerName: "3PM", flex: 1, minWidth: 50 },
-    { field: "fG3A", headerName: "3PA", flex: 1, minWidth: 50 },
-    { field: "fg3Pct", headerName: "3P%", flex: 1, minWidth: 60 },
-    { field: "ftm", headerName: "FTM", flex: 1, minWidth: 50 },
-    { field: "fta", headerName: "FTA", flex: 1, minWidth: 50 },
-    { field: "ftPct", headerName: "FT%", flex: 1, minWidth: 60 },
-    { field: "oreb", headerName: "OREB", flex: 1, minWidth: 60 },
-    { field: "dreb", headerName: "DREB", flex: 1, minWidth: 50 },
-    { field: "reb", headerName: "REB", flex: 1, minWidth: 50 },
-    { field: "ast", headerName: "AST", flex: 1, minWidth: 50 },
-    { field: "stl", headerName: "STL", flex: 1, minWidth: 50 },
-    { field: "blk", headerName: "BLK", flex: 1, minWidth: 50 },
-    { field: "tov", headerName: "TOV", flex: 1, minWidth: 50 },
-    { field: "pf", headerName: "PF", flex: 1, minWidth: 50 },
-  ];
+  const [tabValue, setTabValue] = useState(0);
+  const [selectedRows, setSelectedRows] = useState([]);
+  const [selectedRowIndices, setSelectedIndices] = useState([]);
 
   const addIdToRows = (rows) =>
     rows.map((row, index) => ({ ...row, id: index }));
@@ -64,36 +68,33 @@ function PlayerModal({ player, playerStats, onClose, isModalOpen }) {
     },
   ];
 
-  const [tabValue, setTabValue] = useState(0);
-  const [sliderValues, setSliderValues] = useState({
-    minutes: null,
-    usage: null,
-  });
-  const [selectedRows, setSelectedRows] = useState([]);
-  const [selectedIds, setSelectedIds] = useState([]);
-
   useEffect(() => {
     if (playerStats) {
       const initialSelectedRows = [
         ...(playerStats.seasonTotalsRegularSeason.length > 0
           ? [
-              playerStats.seasonTotalsRegularSeason[
-                playerStats.seasonTotalsRegularSeason.length - 1
-              ],
+              {
+                ...playerStats.seasonTotalsRegularSeason[
+                  playerStats.seasonTotalsRegularSeason.length - 1
+                ],
+                type: "regular",
+              },
             ]
           : []),
         ...(playerStats.seasonTotalsPostSeason.length > 0
           ? [
-              playerStats.seasonTotalsPostSeason[
-                playerStats.seasonTotalsPostSeason.length - 1
-              ],
+              {
+                ...playerStats.seasonTotalsPostSeason[
+                  playerStats.seasonTotalsPostSeason.length - 1
+                ],
+                type: "playoff",
+              },
             ]
           : []),
       ];
-      const initialSelectedIds = initialSelectedRows.map((row) => row.id);
 
       setSelectedRows(initialSelectedRows);
-      setSelectedIds(initialSelectedIds);
+      setSelectedIndices(initialSelectedRows.map((row, index) => index));
     }
   }, [playerStats]);
 
@@ -101,25 +102,25 @@ function PlayerModal({ player, playerStats, onClose, isModalOpen }) {
     setTabValue(newValue);
   };
 
-  const handleSliderChange = (event, newValue, type) => {
-    setSliderValues((prevValues) => ({ ...prevValues, [type]: newValue }));
-  };
-
-  const handleSelectionChange = (ids, type) => {
-    const selectedIDs = new Set(ids);
+  const handleSelectionChange = (rowIndices, type) => {
+    const rowIndexSet = new Set(rowIndices);
     const selectedRowData =
       type === "regular"
-        ? playerStats.seasonTotalsRegularSeason.filter((row) =>
-            selectedIDs.has(row.id)
-          )
-        : playerStats.seasonTotalsPostSeason.filter((row) =>
-            selectedIDs.has(row.id)
-          );
+        ? playerStats.seasonTotalsRegularSeason
+            .filter((row, index) => rowIndexSet.has(index))
+            .map((row) => {
+              return { ...row, type };
+            })
+        : playerStats.seasonTotalsPostSeason
+            .filter((row, index) => rowIndexSet.has(index))
+            .map((row) => {
+              return { ...row, type };
+            });
     setSelectedRows((prev) => [
       ...prev.filter((row) => row.type !== type),
       ...selectedRowData,
     ]);
-    setSelectedIds(Array.from(selectedIDs));
+    setSelectedIndices(Array.from(rowIndexSet));
   };
 
   return (
@@ -198,12 +199,12 @@ function PlayerModal({ player, playerStats, onClose, isModalOpen }) {
               (tabValue === 0 ? (
                 <DataGrid
                   rows={addIdToRows(playerStats.seasonTotalsRegularSeason)}
-                  columns={columns}
+                  columns={COLUMNS}
                   autoHeight
                   hideFooter
                   checkboxSelection
-                  selectionModel={selectedIds}
-                  onSelectionModelChange={(ids) =>
+                  selectionModel={selectedRowIndices}
+                  onRowSelectionModelChange={(ids) =>
                     handleSelectionChange(ids, "regular")
                   }
                 />
@@ -211,12 +212,12 @@ function PlayerModal({ player, playerStats, onClose, isModalOpen }) {
                 tabValue === 1 && (
                   <DataGrid
                     rows={addIdToRows(playerStats.seasonTotalsPostSeason)}
-                    columns={columns}
+                    columns={COLUMNS}
                     autoHeight
                     hideFooter
                     checkboxSelection
-                    selectionModel={selectedIds}
-                    onSelectionModelChange={(ids) =>
+                    selectionModel={selectedRowIndices}
+                    onRowSelectionModelChange={(ids) =>
                       handleSelectionChange(ids, "playoff")
                     }
                   />
@@ -224,13 +225,7 @@ function PlayerModal({ player, playerStats, onClose, isModalOpen }) {
               ))}
           </div>
         </Grow>
-        <RadarChart
-          minutes={sliderValues.minutes}
-          usage={sliderValues.usage}
-          selectedRows={selectedRows}
-          handleSliderChange={handleSliderChange}
-          isModalOpen={isModalOpen}
-        />
+        <RadarChart selectedRows={selectedRows} isModalOpen={isModalOpen} />
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Close</Button>

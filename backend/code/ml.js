@@ -18,7 +18,6 @@ function loadBoxScores() {
   });
 }
 
-
 function aggregateDataByPlayer(data) {
   const playerData = {};
 
@@ -52,8 +51,11 @@ function aggregateDataByPlayer(data) {
     playerData[playerName].games += 1;
   });
 
-  // Average the values where appropriate
+  // Calculate per-game averages and rates
   Object.keys(playerData).forEach((player) => {
+    playerData[player].PTS /= playerData[player].games;
+    playerData[player]["+/-"] /= playerData[player].games;
+    playerData[player].TRB /= playerData[player].games;
     playerData[player].trueShooting /= playerData[player].games;
     playerData[player].assistToTurnover /= playerData[player].games;
     playerData[player].stocks /= playerData[player].games;
@@ -66,10 +68,6 @@ function aggregateDataByPlayer(data) {
 
 function normalize(value, min, max) {
   return (value - min) / (max - min);
-}
-
-function denormalize(value, min, max) {
-  return value * (max - min) + min;
 }
 
 function normalizeData(data) {
@@ -103,17 +101,17 @@ function normalizeData(data) {
   return normalizedData;
 }
 
-function trainModel(features, labels) {
-  return regression.linear(features.map((f, i) => [f[0], labels[i]]));
+function trainScalingModel(features, labels) {
+  return regression.linear(features.map((f, i) => [f[0], labels[i] / f[0]]));
 }
 
 async function initializeModels() {
   try {
-    if (fs.existsSync('./data/models.json')) {
+    if (fs.existsSync("./data/models.json")) {
       logger.info("Models already exist. Skipping model initialization.");
       return;
     }
-    
+
     logger.info("Starting model initialization");
 
     // Load box scores from CSV
@@ -133,10 +131,9 @@ async function initializeModels() {
           )
       )
       .map((row) => {
-        const trueShooting =
-          (+row.PTS) / (2 * (+row.FGA + 0.44 * +row.FTA)) || 0;
-        const assistToTurnover = (+row.AST / +row.TOV) || 0;
-        const stocks = (+row.STL + +row.BLK) || 0;
+        const trueShooting = +row.PTS / (2 * (+row.FGA + 0.44 * +row.FTA)) || 0;
+        const assistToTurnover = +row.AST / +row.TOV || 0;
+        const stocks = +row.STL + +row.BLK || 0;
         const minutesPlayed =
           parseFloat(row.MP.split(":")[0]) +
           parseFloat(row.MP.split(":")[1]) / 60;
@@ -167,7 +164,8 @@ async function initializeModels() {
 
     // Remove any null rows after aggregation
     const finalAggregatedData = Object.values(aggregatedData).filter(
-      (row) => !Object.values(row).some((value) => value === null || value === "NaN")
+      (row) =>
+        !Object.values(row).some((value) => value === null || value === "NaN")
     );
 
     // Normalize data
@@ -176,22 +174,34 @@ async function initializeModels() {
     logger.info("Data normalization complete");
 
     // Prepare features and labels for each model
-    const features = Object.values(normalizedData).map((row) => [row.minutesPlayed, row.usage]);
+    const features = Object.values(normalizedData).map((row) => [
+      row.minutesPlayed,
+      row.usage,
+    ]);
 
     const labelsPTS = Object.values(normalizedData).map((row) => row.PTS);
-    const labelsPlusMinus = Object.values(normalizedData).map((row) => row["+/-"]);
+    const labelsPlusMinus = Object.values(normalizedData).map(
+      (row) => row["+/-"]
+    );
     const labelsTRB = Object.values(normalizedData).map((row) => row.TRB);
-    const labelsTrueShooting = Object.values(normalizedData).map((row) => row.trueShooting);
-    const labelsAssistToTurnover = Object.values(normalizedData).map((row) => row.assistToTurnover);
+    const labelsTrueShooting = Object.values(normalizedData).map(
+      (row) => row.trueShooting
+    );
+    const labelsAssistToTurnover = Object.values(normalizedData).map(
+      (row) => row.assistToTurnover
+    );
     const labelsStocks = Object.values(normalizedData).map((row) => row.stocks);
 
     // Train models for each stat category
-    const modelPTS = trainModel(features, labelsPTS);
-    const modelPlusMinus = trainModel(features, labelsPlusMinus);
-    const modelTRB = trainModel(features, labelsTRB);
-    const modelTrueShooting = trainModel(features, labelsTrueShooting);
-    const modelAssistToTurnover = trainModel(features, labelsAssistToTurnover);
-    const modelStocks = trainModel(features, labelsStocks);
+    const modelPTS = trainScalingModel(features, labelsPTS);
+    const modelPlusMinus = trainScalingModel(features, labelsPlusMinus);
+    const modelTRB = trainScalingModel(features, labelsTRB);
+    const modelTrueShooting = trainScalingModel(features, labelsTrueShooting);
+    const modelAssistToTurnover = trainScalingModel(
+      features,
+      labelsAssistToTurnover
+    );
+    const modelStocks = trainScalingModel(features, labelsStocks);
 
     logger.info("Model training complete");
 
@@ -213,4 +223,5 @@ async function initializeModels() {
 
 module.exports = {
   initializeModels,
+  normalize,
 };

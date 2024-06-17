@@ -30,6 +30,7 @@ const RadarChartComponent = ({ selectedRows }) => {
   const [scaledStats, setScaledStats] = useState(null);
   const [minutes, setMinutes] = useState(null);
   const [usage, setUsage] = useState(null);
+  const [timeoutId, setTimeoutId] = useState(null);
   const theme = useTheme();
 
   const fetchData = async (init = false) => {
@@ -59,6 +60,14 @@ const RadarChartComponent = ({ selectedRows }) => {
     }
   }, [selectedRows]);
 
+  const handleSliderChange = (setter) => (_, value) => {
+    setter(value);
+    if (timeoutId) clearTimeout(timeoutId);
+    setTimeoutId(setTimeout(() => {
+      fetchData();
+    }, 500));
+  };
+
   return (
     <Grow in={selectedRows} timeout={1000}>
         <Card>
@@ -73,10 +82,7 @@ const RadarChartComponent = ({ selectedRows }) => {
                 <Slider
                   value={minutes}
                   disabled={minutes == null}
-                  onChange={(_, value) => {
-                    setMinutes(value);
-                    fetchData();
-                  }}
+                  onChange={handleSliderChange(setMinutes)}
                   aria-labelledby="minutes-slider"
                   min={0}
                   max={48}
@@ -89,10 +95,7 @@ const RadarChartComponent = ({ selectedRows }) => {
                 <Slider
                   value={usage}
                   disabled={usage == null}
-                  onChange={(_, value) => {
-                    setUsage(value);
-                    fetchData();
-                  }}
+                  onChange={handleSliderChange(setUsage)}
                   aria-labelledby="usage-slider"
                   min={0}
                   max={1}

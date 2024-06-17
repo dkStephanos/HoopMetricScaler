@@ -9,6 +9,20 @@ const getExtendedPlayerInfo = async (playerId) => {
     }
 };
 
+function applyScalingFactors(initialStats, scalingFactors) {
+    return {
+      PTS: initialStats.PTS * scalingFactors.PTS_scaling,
+      TRB: initialStats.TRB * scalingFactors.TRB_scaling,
+      trueShooting: initialStats.trueShooting * scalingFactors.trueShooting_scaling,
+      assistToTurnover: initialStats.assistToTurnover * scalingFactors.assistToTurnover_scaling,
+      stocks: initialStats.stocks * scalingFactors.stocks_scaling,
+      minutesPlayed: initialStats.minutesPlayed,
+      usage: initialStats.usage,
+    };
+  }
+  
+
 module.exports = {
-    getExtendedPlayerInfo
+    getExtendedPlayerInfo,
+    applyScalingFactors
 };

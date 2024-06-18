@@ -3,6 +3,7 @@ const csv = require("csv-parser");
 const regression = require("regression");
 const logger = require("./logger");
 
+// Load box scores from CSV
 function loadBoxScores() {
   return new Promise((resolve, reject) => {
     const data = [];
@@ -18,6 +19,7 @@ function loadBoxScores() {
   });
 }
 
+// Aggregate data by player
 function aggregateDataByPlayer(data) {
   const playerData = {};
 
@@ -31,33 +33,31 @@ function aggregateDataByPlayer(data) {
         "+/-": 0,
         TRB: 0,
         trueShooting: 0,
-        assistToTurnover: 0,
+        weightedAssistToTurnover: 0,
         stocks: 0,
-        games: 0, // To keep track of the number of games
+        games: 0,
         minutesPlayed: 0,
         usage: 0,
       };
     }
 
-    // Sum up the values
     playerData[playerName].PTS += row.PTS;
     playerData[playerName]["+/-"] += row["+/-"];
     playerData[playerName].TRB += row.TRB;
     playerData[playerName].trueShooting += row.trueShooting;
-    playerData[playerName].assistToTurnover += row.assistToTurnover;
+    const assistToTurnover = row.assistToTurnover;
+    const weightedAssistToTurnover = assistToTurnover * Math.sqrt(row.AST);
+    playerData[playerName].weightedAssistToTurnover += weightedAssistToTurnover;
     playerData[playerName].stocks += row.stocks;
     playerData[playerName].minutesPlayed += row.minutesPlayed;
     playerData[playerName].usage += row.usage;
     playerData[playerName].games += 1;
   });
 
-  // Calculate per-game averages and rates
+  // Average the values where appropriate
   Object.keys(playerData).forEach((player) => {
-    playerData[player].PTS /= playerData[player].games;
-    playerData[player]["+/-"] /= playerData[player].games;
-    playerData[player].TRB /= playerData[player].games;
     playerData[player].trueShooting /= playerData[player].games;
-    playerData[player].assistToTurnover /= playerData[player].games;
+    playerData[player].weightedAssistToTurnover /= playerData[player].games;
     playerData[player].stocks /= playerData[player].games;
     playerData[player].minutesPlayed /= playerData[player].games;
     playerData[player].usage /= playerData[player].games;
@@ -66,6 +66,7 @@ function aggregateDataByPlayer(data) {
   return playerData;
 }
 
+// Normalize data
 function normalize(value, min, max) {
   return (value - min) / (max - min);
 }
@@ -77,7 +78,7 @@ function normalizeData(data) {
     "+/-",
     "TRB",
     "trueShooting",
-    "assistToTurnover",
+    "weightedAssistToTurnover",
     "stocks",
   ];
   const minMax = {};
@@ -101,10 +102,12 @@ function normalizeData(data) {
   return normalizedData;
 }
 
+// Train scaling model
 function trainScalingModel(features, labels) {
   return regression.linear(features.map((f, i) => [f[0], labels[i] / f[0]]));
 }
 
+// Initialize models
 async function initializeModels() {
   try {
     if (fs.existsSync("./data/models.json")) {
@@ -142,7 +145,7 @@ async function initializeModels() {
         return {
           player_name: row.player_name,
           PTS: +row.PTS,
-          "+/-": +row["+/-"], // Ensure plus/minus is treated as a number
+          "+/-": +row["+/-"],
           TRB: +row.TRB,
           trueShooting: isFinite(trueShooting) ? trueShooting : 0,
           assistToTurnover: isFinite(assistToTurnover) ? assistToTurnover : 0,
@@ -187,8 +190,8 @@ async function initializeModels() {
     const labelsTrueShooting = Object.values(normalizedData).map(
       (row) => row.trueShooting
     );
-    const labelsAssistToTurnover = Object.values(normalizedData).map(
-      (row) => row.assistToTurnover
+    const labelsWeightedAssistToTurnover = Object.values(normalizedData).map(
+      (row) => row.weightedAssistToTurnover
     );
     const labelsStocks = Object.values(normalizedData).map((row) => row.stocks);
 
@@ -197,9 +200,9 @@ async function initializeModels() {
     const modelPlusMinus = trainScalingModel(features, labelsPlusMinus);
     const modelTRB = trainScalingModel(features, labelsTRB);
     const modelTrueShooting = trainScalingModel(features, labelsTrueShooting);
-    const modelAssistToTurnover = trainScalingModel(
+    const modelWeightedAssistToTurnover = trainScalingModel(
       features,
-      labelsAssistToTurnover
+      labelsWeightedAssistToTurnover
     );
     const modelStocks = trainScalingModel(features, labelsStocks);
 
@@ -211,7 +214,7 @@ async function initializeModels() {
       plusMinus: modelPlusMinus,
       TRB: modelTRB,
       trueShooting: modelTrueShooting,
-      assistToTurnover: modelAssistToTurnover,
+      weightedAssistToTurnover: modelWeightedAssistToTurnover,
       stocks: modelStocks,
     };
     fs.writeFileSync("./data/models.json", JSON.stringify(models));

@@ -103,13 +103,14 @@ app.post('/scale-stats', (req, res) => {
         const scalingFactors = {};
         STATS.forEach(stat => {
           const model = models[stat];
-          const result = model.predict([[minutes, usage]]);
+          const result = model.predict([[minutes * usage]]);
           scalingFactors[stat] = result[1];
         });
-
-        console.log(scalingFactors)
   
-        const scaledStats = applyScalingFactors(averageRow, scalingFactors);
+        const scaledStats = {};
+        STATS.forEach(stat => {
+          scaledStats[stat] = averageRow[stat] + (scalingFactors[stat] - averageRow[stat]);
+        });
         scaledStats["minutesPlayed"] = minutes;
         scaledStats["usage"] = usage;
   
@@ -117,6 +118,7 @@ app.post('/scale-stats', (req, res) => {
       });
   });
   
+
 
 // ---------------- PLAYER STATS ----------------
 app.get("/player-stats/:id", async (req, res) => {

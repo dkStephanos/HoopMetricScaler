@@ -58,9 +58,9 @@ app.post('/scale-stats', (req, res) => {
         }));
   
         const minMax = {};
-        const stats = ['PTS', 'TRB', 'trueShooting', 'assistToTurnover', 'stocks'];
+        const STATS = ['PTS', 'TRB', 'trueShooting', 'assistToTurnover', 'stocks'];
   
-        stats.forEach(stat => {
+        STATS.forEach(stat => {
           const values = perGameData.map(player => player[stat]);
           minMax[stat] = { min: Math.min(...values), max: Math.max(...values) };
         });
@@ -101,11 +101,13 @@ app.post('/scale-stats', (req, res) => {
         }
   
         const scalingFactors = {};
-        stats.forEach(stat => {
+        STATS.forEach(stat => {
           const model = models[stat];
           const result = model.predict([[minutes, usage]]);
           scalingFactors[stat] = result[1];
         });
+
+        console.log(scalingFactors)
   
         const scaledStats = applyScalingFactors(averageRow, scalingFactors);
         scaledStats["minutesPlayed"] = minutes;

@@ -27,16 +27,23 @@ const CATEGORIES = [
 ];
 
 const RadarChartComponent = ({ selectedRows }) => {
-  const [scaledStats, setScaledStats] = useState(null);
-  const [minutes, setMinutes] = useState(null);
-  const [usage, setUsage] = useState(null);
-  const [timeoutId, setTimeoutId] = useState(null);
   const theme = useTheme();
+  const [scaledStats, setScaledStats] = useState(null);
+  const [sliderValue, setSliderValue] = useState({ minutes: null, usage: null });
+
+  useEffect(() => {
+    if (selectedRows?.length > 0) {
+      fetchData(true);
+    } else {
+      setScaledStats(null);
+      setSliderValue({ minutes: null, usage: null });
+    }
+  }, [selectedRows]);
 
   const fetchData = async (init = false) => {
     let data = await fetchScaledStats(
-      minutes,
-      usage,
+      sliderValue.minutes,
+      sliderValue.usage,
       selectedRows,
       init || scaledStats == null
     );
@@ -45,91 +52,78 @@ const RadarChartComponent = ({ selectedRows }) => {
         data[key] = 0;
       }
     }
-    setMinutes(data.minutesPlayed);
-    setUsage(data.usage);
+    setSliderValue({ minutes: data.minutesPlayed, usage: data.usage });
     setScaledStats(data);
   };
 
-  useEffect(() => {
-    if (selectedRows?.length > 0) {
-      fetchData(true);
-    } else {
-      setScaledStats(null);
-      setMinutes(null);
-      setUsage(null);
-    }
-  }, [selectedRows]);
-
-  const handleSliderChange = (setter) => (_, value) => {
-    setter(value);
-    if (timeoutId) clearTimeout(timeoutId);
-    setTimeoutId(setTimeout(() => {
-      fetchData();
-    }, 500));
+  const handleSliderChange = (type) => (_, value) => {
+    setSliderValue((prev) => ({ ...prev, [type]: value }));
   };
 
   return (
     <Grow in={selectedRows} timeout={1000}>
-        <Card>
-          <CardContent>
-            <h5>
-              Select rows from the tables above to update the chart. The sliders
-              below will augment expected value based on historic trends.
-            </h5>
-            <div style={theme.custom.sliderContainer}>
-              <div style={theme.custom.sliderItem}>
-                <Typography gutterBottom>Minutes Played</Typography>
-                <Slider
-                  value={minutes}
-                  disabled={minutes == null}
-                  onChange={handleSliderChange(setMinutes)}
-                  aria-labelledby="minutes-slider"
-                  min={0}
-                  max={48}
-                  step={1}
-                  valueLabelDisplay="auto"
-                />
-              </div>
-              <div style={theme.custom.sliderItem}>
-                <Typography gutterBottom>Usage Rate</Typography>
-                <Slider
-                  value={usage}
-                  disabled={usage == null}
-                  onChange={handleSliderChange(setUsage)}
-                  aria-labelledby="usage-slider"
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  valueLabelDisplay="auto"
-                />
-              </div>
+      <Card>
+        <CardContent>
+          <h5>
+            Select rows from the tables above to update the chart. The sliders
+            below will augment expected value based on historic trends.
+          </h5>
+          <div style={theme.custom.sliderContainer}>
+            <div style={theme.custom.sliderItem}>
+              <Typography gutterBottom>Minutes Played</Typography>
+              <Slider
+                value={sliderValue.minutes}
+                disabled={sliderValue.minutes == null}
+                onChange={handleSliderChange("minutes")}
+                onChangeCommitted={() => fetchData()}
+                aria-labelledby="minutes-slider"
+                min={0}
+                max={48}
+                step={1}
+                valueLabelDisplay="auto"
+              />
             </div>
-              {selectedRows != null ? (
-                <ResponsiveContainer width="100%" height={400}>
-                  <RadarChart
-                    data={CATEGORIES.map((category) => ({
-                      category: category.label,
-                      value: scaledStats ? scaledStats[category.name] : 0,
-                    }))}
-                  >
-                    <PolarGrid />
-                    <PolarAngleAxis dataKey="category" />
-                    <PolarRadiusAxis angle={55} domain={[0, 1]} />
-                    <Radar
-                      name="Player Stats"
-                      dataKey="value"
-                      stroke="#8884d8"
-                      fill="#8884d8"
-                      fillOpacity={0.6}
-                    />
-                    <Tooltip />
-                  </RadarChart>
-                </ResponsiveContainer>
-              ) : (
-                <p>Loading...</p>
-              )}
-          </CardContent>
-        </Card>
+            <div style={theme.custom.sliderItem}>
+              <Typography gutterBottom>Usage Rate</Typography>
+              <Slider
+                value={sliderValue.usage}
+                disabled={sliderValue.usage == null}
+                onChange={handleSliderChange("usage")}
+                onChangeCommitted={() => fetchData()}
+                aria-labelledby="usage-slider"
+                min={0}
+                max={1}
+                step={0.01}
+                valueLabelDisplay="auto"
+              />
+            </div>
+          </div>
+          {selectedRows != null ? (
+            <ResponsiveContainer width="100%" height={400}>
+              <RadarChart
+                data={CATEGORIES.map((category) => ({
+                  category: category.label,
+                  value: scaledStats ? scaledStats[category.name] : 0,
+                }))}
+              >
+                <PolarGrid />
+                <PolarAngleAxis dataKey="category" />
+                <PolarRadiusAxis angle={55} domain={[0, 1]} />
+                <Radar
+                  name="Player Stats"
+                  dataKey="value"
+                  stroke="#8884d8"
+                  fill="#8884d8"
+                  fillOpacity={0.6}
+                />
+                <Tooltip />
+              </RadarChart>
+            </ResponsiveContainer>
+          ) : (
+            <p>Loading...</p>
+          )}
+        </CardContent>
+      </Card>
     </Grow>
   );
 };

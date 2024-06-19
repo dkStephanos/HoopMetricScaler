@@ -70,7 +70,7 @@ app.post('/scale-stats', (req, res) => {
   
         const normalizedRows = selectedRows.map(row => {
           const trueShooting = row.pts / (2 * (row.fga + 0.44 * row.fta)) || 0;
-          const assistToTurnover = row.ast / row.tov || 0;
+          const assistToTurnover = (row.ast / row.tov) * Math.sqrt(row.ast) || 0;
           const stocks = row.stl + row.blk || 0;
           const usage = (row.fga + 0.44 * row.fta + row.tov) / row.min || 0;
   

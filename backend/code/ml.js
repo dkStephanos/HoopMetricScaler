@@ -137,7 +137,7 @@ async function initializeModels() {
       )
       .map((row) => {
         const trueShooting = +row.PTS / (2 * (+row.FGA + 0.44 * +row.FTA)) || 0;
-        const assistToTurnover = +row.AST / +row.TOV || 0;
+        const assistToTurnover = +(row.AST / +row.TOV) * Math.sqrt(row.AST) || 0;
         const stocks = +row.STL + +row.BLK || 0;
         const minutesPlayed =
           parseFloat(row.MP.split(":")[0]) +
